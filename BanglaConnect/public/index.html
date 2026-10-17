@@ -72,29 +72,10 @@
     @media(max-width:640px){
       body,html{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
       .app-container{height:100vh;height:100dvh;min-height:0;overflow:hidden;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
-<<<<<<< HEAD
       .video-grid{flex:1;min-height:0;height:auto;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) 43px minmax(0,1fr);gap:0;perspective:1000px}
       .video-box{width:100%;height:auto;min-height:0;min-width:0;position:relative;flex:none}
       .video-box:nth-child(2){height:auto;border-top:0}
       .video-box video{object-fit:contain}
-=======
-      
-
-
-#remoteVideo,
-  #localVideo {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    display: block;
-  }
-
-  .mobile-divider {
-    grid-row: 2;
-  }
-}
-
->>>>>>> e820342 (Updated index.html camera and static video assets)
       .brand-overlay>span{display:none!important}
       .brand-overlay img{height:28px}
       .static-brand-content{gap:8px}.static-brand-content img{height:54px}.static-brand-text{font-size:17px;letter-spacing:1px}
@@ -486,6 +467,119 @@
 }
 
  
+/* ===== CAMERA ASPECT RATIO FIX ===== */
+
+/* Preserve the natural video ratio; fill the 4:3 box by cropping */
+#remoteVideo,
+#localVideo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+}
+
+/* Keep both video panels at 4:3 on desktop */
+@media (min-width: 641px) {
+  .video-box {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+  }
+}
+
+/* Mobile: equal video panels with no side bars */
+@media (max-width: 640px) {
+  #remoteBox,
+  #localBox {
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  #remoteVideo,
+  #localVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+}
+
+
+/* ===== DESKTOP FULL-BLEED VIDEO LAYOUT FIX ===== */
+@media (min-width: 641px) {
+
+  /* Remove the empty black space above, below and beside videos */
+  .app-container {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    padding: 0;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  .video-grid {
+    flex: 1 1 0;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    padding: 0;
+    margin: 0;
+    gap: 0;
+    align-items: stretch;
+    justify-content: stretch;
+    overflow: hidden;
+  }
+
+  /* Make both camera panels fill the available height */
+  #remoteBox,
+  #localBox {
+    flex: 1 1 50%;
+    width: 50%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    aspect-ratio: auto;
+    border: 0;
+    border-radius: 0;
+    overflow: hidden;
+  }
+
+  /* Fill each panel without stretching or distorting faces */
+  #remoteVideo,
+  #localVideo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+  }
+
+  /* Expand the bottom control bar's background upward in its area */
+  .bottom-bar {
+    position: relative;
+    flex: 0 0 auto;
+    width: 100%;
+    min-height: 78px;
+    margin: 0;
+    padding: 12px 16px;
+    gap: 8px;
+    border-radius: 0;
+    box-sizing: border-box;
+  }
+
+  .status-container,
+  .controls-container,
+  .message-container {
+    min-width: 0;
+  }
+}
+
+
  </style>
 </head>
 <body>
@@ -508,22 +602,12 @@
         <video id="localVideo" autoplay muted playsinline></video>
         <button type="button" class="filter-toggle" id="filterToggle" aria-expanded="false" aria-controls="filterPanel">Filter ▾</button>
         <div class="filter-panel" id="filterPanel" aria-label="Video filters">
-<<<<<<< HEAD
-          <button type="button" class="filter-btn" data-filter="normal">Original</button>
-          <button type="button" class="filter-btn active" data-filter="brightGlow">Bright Glow</button>
-          <button type="button" class="filter-btn" data-filter="softFair">Soft Fair Glow</button>
-          <button type="button" class="filter-btn" data-filter="funnyLens">Funny Lens</button>
-          <button type="button" class="filter-btn" data-filter="beauty">Beauty</button>
-=======
-       
-<button type="button" class="filter-btn active" data-filter="normal">Original</button>
-<button type="button" class="filter-btn" data-filter="brightGlow">Bright Glow</button>
 
+          <button type="button" class="filter-btn active" data-filter="normal">Original</button>
+          <button type="button" class="filter-btn" data-filter="brightGlow">Bright Glow</button>
           <button type="button" class="filter-btn" data-filter="softFair">Soft Skin</button>
           <button type="button" class="filter-btn" data-filter="funnyLens">iPhone Vivid</button>
           <button type="button" class="filter-btn" data-filter="beauty">Beauty Glow</button>
->>>>>>> e820342 (Updated index.html camera and static video assets)
-          <button type="button" class="filter-btn" data-filter="glamLook">Glam Look</button>
           <div class="filter-hint">Tap once to preview · tap again to apply</div>
         </div>
       </div>
@@ -571,7 +655,16 @@ const filterNames={normal:"Original",brightGlow:"Bright Glow",softFair:"Soft Fai
     genderSelect.addEventListener("change",()=>{if(peerId||status.textContent.includes("Looking For Someone")||status.textContent.includes("Waiting For A Partner")){closePeer();emitNextWithFilters()}});
     updateChatRegionIcon();
 
-    async function startCamera(){if(localStream)return true;if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){status.textContent="Camera needs HTTPS or localhost. Open the secure site.";return false}try{localStream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640,max:1280},height:{ideal:480,max:960},aspectRatio: { ideal: 4 / 3 },facingMode:"user"},audio:true});localVideo.srcObject=localStream;await localVideo.play().catch(()=>{});setupProcessedVideo();return true}catch(error){console.error("Camera/microphone error:",error);status.textContent=error.name==="NotAllowedError"?"Allow Camera and Microphone permission in browser settings.":"Camera/Microphone unavailable. Check device permissions.";return false}}
+    async function startCamera(){if(localStream)return true;if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){status.textContent="Camera needs HTTPS or localhost. Open the secure site.";return false}try{localStream = await navigator.mediaDevices.getUserMedia({
+  video: {
+    width: { ideal: 1280, max: 1280 },
+    height: { ideal: 960, max: 960 },
+    aspectRatio: { ideal: 4 / 3 },
+    frameRate: { ideal: 30, max: 60 },
+    facingMode: "user"
+  },
+  audio: true
+});localVideo.srcObject=localStream;await localVideo.play().catch(()=>{});setupProcessedVideo();return true}catch(error){console.error("Camera/microphone error:",error);status.textContent=error.name==="NotAllowedError"?"Allow Camera and Microphone permission in browser settings.":"Camera/Microphone unavailable. Check device permissions.";return false}}
    
 function setupProcessedVideo() {
   if (!localStream || processedCanvas) return;
@@ -689,8 +782,9 @@ function stopFilterProcessing() {
   }
 }
 
-
-    function outgoingStream(){return processedStream||localStream}
+function outgoingStream() {
+  return localStream;
+}
     function applyPreviewFilter(name){previewFilter=name;localVideo.style.filter=filterCss[name]||"none";document.querySelectorAll(".filter-btn").forEach(button=>button.classList.toggle("active",button.dataset.filter===name));$("activeFilterText").textContent=filterNames[name]||"Normal"}
     document.querySelectorAll(".filter-btn").forEach(button=>button.addEventListener("click",()=>{const name=button.dataset.filter;if(pendingFilterApply!==name){pendingFilterApply=name;applyPreviewFilter(name);status.textContent=`Previewing ${filterNames[name]} — tap again to apply`;clearTimeout(filterTapTimer);filterTapTimer=setTimeout(()=>{pendingFilterApply=null;applyPreviewFilter(activeFilter)},5000);return}activeFilter=name;pendingFilterApply=null;applyPreviewFilter(activeFilter);status.textContent=`${filterNames[name]} filter applied`;clearTimeout(filterTapTimer);filterPanel.classList.remove("open");filterToggle.setAttribute("aria-expanded","false");filterToggle.textContent="Filter ▾"}));
 
@@ -701,14 +795,92 @@ function stopFilterProcessing() {
     function displayRemoteMessage(msg){const typingEl=$("typingIndicator");if(typingEl)typingEl.remove();const bubble=document.createElement("div");bubble.className="chat-bubble";bubble.textContent=msg;remoteChatOverlay.appendChild(bubble);playNotificationSound();setTimeout(()=>bubble.remove(),6000)}
     chatInput.addEventListener("input",()=>{if(!peerId)return;socket.emit("typing",true);clearTimeout(typingTimeout);typingTimeout=setTimeout(()=>socket.emit("typing",false),1200)});sendBtn.addEventListener("click",sendMessage);chatInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();sendMessage()}});
     async function flushCandidates(){if(!peerConnection?.remoteDescription)return;for(const candidate of pendingCandidates.splice(0)){try{await peerConnection.addIceCandidate(candidate)}catch(error){console.error(error)}}}
-    function createPeer(){if(!localStream){status.textContent="Camera is not ready.";return}closePeer();peerConnection=new RTCPeerConnection(rtcConfig);const stream=outgoingStream();stream.getTracks().forEach(track=>peerConnection.addTrack(track,stream));peerConnection.ontrack=event=>{if(event.streams[0]){remoteVideo.style.transition="none";remoteVideo.style.filter="blur(20px)";remoteVideo.srcObject=event.streams[0];remoteVideo.play().catch(e=>console.log(e));staticContainer.style.display="none";staticVideo.pause();brandOverlay.style.display="flex";requestAnimationFrame(()=>setTimeout(()=>{remoteVideo.style.transition="filter 1s ease";remoteVideo.style.filter="blur(0px)"},40))}};peerConnection.onicecandidate=event=>{if(event.candidate)sendSignal({type:"candidate",candidate:event.candidate})};peerConnection.onconnectionstatechange=()=>{if(!peerConnection)return;if(peerConnection.connectionState==="connected")status.textContent="Connected To Another User !!";else if(peerConnection.connectionState==="failed")status.textContent="Connection Failed, Try Again !!"}}
+   
+async function createPeer() {
+  if (!localStream) {
+    status.textContent = "Camera is not ready.";
+    return;
+  }
+
+  closePeer();
+
+  peerConnection = new RTCPeerConnection(rtcConfig);
+
+  const currentPeer = peerConnection;
+  const stream = outgoingStream();
+
+  for (const track of stream.getTracks()) {
+    const sender = currentPeer.addTrack(track, stream);
+
+    if (track.kind === "video") {
+      try {
+        const params = sender.getParameters();
+
+        if (params.encodings && params.encodings.length > 0) {
+          params.encodings[0].maxBitrate = 1500000;
+          params.encodings[0].maxFramerate = 60;
+        } else {
+          params.encodings = [{
+            maxBitrate: 1500000,
+            maxFramerate: 60
+          }];
+        }
+
+        await sender.setParameters(params);
+      } catch (error) {
+        console.warn("Video quality settings could not be applied:", error);
+      }
+    }
+  }
+
+  currentPeer.ontrack = event => {
+    if (event.streams[0]) {
+      remoteVideo.style.transition = "none";
+      remoteVideo.style.filter = "blur(20px)";
+      remoteVideo.srcObject = event.streams[0];
+
+      remoteVideo.play().catch(error => console.log(error));
+
+      staticContainer.style.display = "none";
+      staticVideo.pause();
+      brandOverlay.style.display = "flex";
+
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          remoteVideo.style.transition = "filter 1s ease";
+          remoteVideo.style.filter = "blur(0px)";
+        }, 40);
+      });
+    }
+  };
+
+  currentPeer.onicecandidate = event => {
+    if (event.candidate) {
+      sendSignal({
+        type: "candidate",
+        candidate: event.candidate
+      });
+    }
+  };
+
+  currentPeer.onconnectionstatechange = () => {
+    if (peerConnection !== currentPeer) return;
+
+    if (currentPeer.connectionState === "connected") {
+      status.textContent = "Connected To Another User !!";
+    } else if (currentPeer.connectionState === "failed") {
+      status.textContent = "Connection Failed, Try Again !!";
+    }
+  };
+}
+
     async function handleSignal(data){if(data.type==="chat"){if(typeof data.message==="string")displayRemoteMessage("Stranger: "+data.message.slice(0,500));return}if(!peerConnection)return;try{if(data.type==="offer"){await peerConnection.setRemoteDescription(data.offer);await flushCandidates();const answer=await peerConnection.createAnswer();await peerConnection.setLocalDescription(answer);sendSignal({type:"answer",answer:peerConnection.localDescription})}else if(data.type==="answer"){await peerConnection.setRemoteDescription(data.answer);await flushCandidates()}else if(data.type==="candidate"){if(peerConnection.remoteDescription)await peerConnection.addIceCandidate(data.candidate);else pendingCandidates.push(data.candidate)}}catch(error){console.error(error);status.textContent="There Was A Problem Establishing The Connection !!"}}
-    async function nextPartner(){if(!authReady){status.textContent="Checking login, please wait...";return}const ok=await startCamera();startFilterProcessing();if(!ok)return;if(!socket.connected){status.textContent="Connecting to server...";pendingNextRequest=true;socket.connect();return}videoGrid.classList.remove("flip-next");void videoGrid.offsetWidth;videoGrid.classList.add("flip-next");setTimeout(()=>videoGrid.classList.remove("flip-next"),450);closePeer();chatStopped=false;emitNextWithFilters()}
+    async function nextPartner(){if(!authReady){status.textContent="Checking login, please wait...";return}const ok=await startCamera();if(!ok)return;if(!socket.connected){status.textContent="Connecting to server...";pendingNextRequest=true;socket.connect();return}videoGrid.classList.remove("flip-next");void videoGrid.offsetWidth;videoGrid.classList.add("flip-next");setTimeout(()=>videoGrid.classList.remove("flip-next"),450);closePeer();chatStopped=false;emitNextWithFilters()}
     $("next").addEventListener("click",nextPartner);
     $("stop").addEventListener("click",()=>{chatStopped=true;stopFilterProcessing();if(socket.connected)socket.emit("stop-chat");closePeer();status.textContent="Chat Stopped. Click Next to find someone !!"});
     socket.on("connect",()=>{if(pendingNextRequest){pendingNextRequest=false;emitNextWithFilters()}});socket.on("report-result",result=>{status.textContent=result?.message||(result?.ok?"Report submitted. Thank you.":"Could not submit report.")});socket.on("online-count",count=>{onlineCountText.textContent=`Online: ${count}`;mobileOnlineCountText.textContent=`Online: ${count}`});socket.on("waiting",()=>{status.textContent="Waiting For A Partner To Connect..."});
     socket.on("partner-typing",isTyping=>{let typingEl=$("typingIndicator");if(isTyping){if(!typingEl){typingEl=document.createElement("div");typingEl.id="typingIndicator";typingEl.className="chat-bubble typing-bubble";typingEl.textContent="Stranger is typing...";remoteChatOverlay.appendChild(typingEl)}}else if(typingEl)typingEl.remove()});
-    socket.on("matched",async match=>{if(!match||!match.peerId)return;createPeer();if(!peerConnection)return;peerId=match.peerId;status.textContent="Partner Found, Connecting...";playNotificationSound();if(match.initiator){try{const offer=await peerConnection.createOffer();await peerConnection.setLocalDescription(offer);sendSignal({type:"offer",offer:peerConnection.localDescription})}catch(error){console.error(error);status.textContent="The Call Could Not Be Started !!"}}});
+    socket.on("matched",async match=>{if(!match||!match.peerId)return;await createPeer();if(!peerConnection)return;peerId=match.peerId;status.textContent="Partner Found, Connecting...";playNotificationSound();if(match.initiator){try{const offer=await peerConnection.createOffer();await peerConnection.setLocalDescription(offer);sendSignal({type:"offer",offer:peerConnection.localDescription})}catch(error){console.error(error);status.textContent="The Call Could Not Be Started !!"}}});
     socket.on("signal",async message=>{if(message&&message.from===peerId)await handleSignal(message.data)});socket.on("partner-left",()=>{closePeer();if(!chatStopped)status.textContent="Partner Left, Click Next To Find Someone Else !!"});socket.on("connect_error",error=>{console.error("Socket connection error:",error);status.textContent="Cannot Connect To Server. Check login/session and server."});
 
     $("reportBtn").addEventListener("click",()=>{if(!peerId){status.textContent="Connect to a partner before reporting.";return}const reason=window.prompt("Why are you reporting this user?\n1. Nudity / sexual content\n2. Harassment / abuse\n3. Spam / other\nType a short reason:");if(reason===null)return;const cleanReason=reason.trim().slice(0,250);if(!cleanReason){status.textContent="Please enter a report reason.";return}socket.emit("report",{reason:cleanReason});status.textContent="Submitting report..."});

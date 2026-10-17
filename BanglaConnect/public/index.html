@@ -802,8 +802,6 @@ async function createPeer() {
     return;
   }
 
-  closePeer();
-
   peerConnection = new RTCPeerConnection(rtcConfig);
 
   const currentPeer = peerConnection;
@@ -880,7 +878,36 @@ async function createPeer() {
     $("stop").addEventListener("click",()=>{chatStopped=true;stopFilterProcessing();if(socket.connected)socket.emit("stop-chat");closePeer();status.textContent="Chat Stopped. Click Next to find someone !!"});
     socket.on("connect",()=>{if(pendingNextRequest){pendingNextRequest=false;emitNextWithFilters()}});socket.on("report-result",result=>{status.textContent=result?.message||(result?.ok?"Report submitted. Thank you.":"Could not submit report.")});socket.on("online-count",count=>{onlineCountText.textContent=`Online: ${count}`;mobileOnlineCountText.textContent=`Online: ${count}`});socket.on("waiting",()=>{status.textContent="Waiting For A Partner To Connect..."});
     socket.on("partner-typing",isTyping=>{let typingEl=$("typingIndicator");if(isTyping){if(!typingEl){typingEl=document.createElement("div");typingEl.id="typingIndicator";typingEl.className="chat-bubble typing-bubble";typingEl.textContent="Stranger is typing...";remoteChatOverlay.appendChild(typingEl)}}else if(typingEl)typingEl.remove()});
-    socket.on("matched",async match=>{if(!match||!match.peerId)return;await createPeer();if(!peerConnection)return;peerId=match.peerId;status.textContent="Partner Found, Connecting...";playNotificationSound();if(match.initiator){try{const offer=await peerConnection.createOffer();await peerConnection.setLocalDescription(offer);sendSignal({type:"offer",offer:peerConnection.localDescription})}catch(error){console.error(error);status.textContent="The Call Could Not Be Started !!"}}});
+    
+socket.on("matched", async match => {
+  if (!match || !match.peerId) return;
+
+  closePeer();
+  peerId = match.peerId;
+
+  try {
+    await createPeer();
+
+    if (!peerConnection || !peerId) return;
+
+    status.textContent = "Partner Found, Connecting...";
+    playNotificationSound();
+
+    if (match.initiator) {
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+
+      sendSignal({
+        type: "offer",
+        offer: peerConnection.localDescription
+      });
+    }
+  } catch (error) {
+    console.error("WebRTC connection error:", error);
+    status.textContent = "The Call Could Not Be Started !!";
+  }
+});
+
     socket.on("signal",async message=>{if(message&&message.from===peerId)await handleSignal(message.data)});socket.on("partner-left",()=>{closePeer();if(!chatStopped)status.textContent="Partner Left, Click Next To Find Someone Else !!"});socket.on("connect_error",error=>{console.error("Socket connection error:",error);status.textContent="Cannot Connect To Server. Check login/session and server."});
 
     $("reportBtn").addEventListener("click",()=>{if(!peerId){status.textContent="Connect to a partner before reporting.";return}const reason=window.prompt("Why are you reporting this user?\n1. Nudity / sexual content\n2. Harassment / abuse\n3. Spam / other\nType a short reason:");if(reason===null)return;const cleanReason=reason.trim().slice(0,250);if(!cleanReason){status.textContent="Please enter a report reason.";return}socket.emit("report",{reason:cleanReason});status.textContent="Submitting report..."});

@@ -579,6 +579,12 @@
   }
 }
 
+/* MOBILE ONLY: Fix local camera's horizontal mirroring */
+@media (max-width: 640px) {
+  #localVideo {
+    transform: scaleX(-1);
+  }
+}
 
  </style>
 </head>
@@ -947,8 +953,51 @@ socket.on("matched", async match => {
 
     $("reportBtn").addEventListener("click",()=>{if(!peerId){status.textContent="Connect to a partner before reporting.";return}const reason=window.prompt("Why are you reporting this user?\n1. Nudity / sexual content\n2. Harassment / abuse\n3. Spam / other\nType a short reason:");if(reason===null)return;const cleanReason=reason.trim().slice(0,250);if(!cleanReason){status.textContent="Please enter a report reason.";return}socket.emit("report",{reason:cleanReason});status.textContent="Submitting report..."});
 
-    // Mobile swipe left on the stranger's video to find the next partner.
-    let touchStartX=0,touchStartY=0,touchStartTime=0;const remoteBox=$("remoteBox");remoteBox.addEventListener("touchstart",event=>{if(event.touches.length!==1)return;touchStartX=event.touches[0].clientX;touchStartY=event.touches[0].clientY;touchStartTime=Date.now()},{passive:true});remoteBox.addEventListener("touchend",event=>{if(!touchStartTime||!event.changedTouches.length)return;const dx=event.changedTouches[0].clientX-touchStartX,dy=event.changedTouches[0].clientY-touchStartY,duration=Date.now()-touchStartTime;touchStartTime=0;if(dx< -65&&Math.abs(dx)>Math.abs(dy)*1.25&&duration<900)nextPartner()},{passive:true});
+    
+    
+    // Mobile-only swipe controls on the stranger's video
+    // Right-to-left = Next partner
+    // Left-to-right = Stop chat
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartTime = 0;
+    const remoteBox = $("remoteBox");
+
+    remoteBox.addEventListener("touchstart", event => {
+      if (!window.matchMedia("(max-width: 640px)").matches) return;
+      if (event.touches.length !== 1) return;
+
+      touchStartX = event.touches[0].clientX;
+      touchStartY = event.touches[0].clientY;
+      touchStartTime = Date.now();
+    }, { passive: true });
+
+    remoteBox.addEventListener("touchend", event => {
+      if (!window.matchMedia("(max-width: 640px)").matches) return;
+      if (!touchStartTime || !event.changedTouches.length) return;
+
+      const dx = event.changedTouches[0].clientX - touchStartX;
+      const dy = event.changedTouches[0].clientY - touchStartY;
+      const duration = Date.now() - touchStartTime;
+
+      touchStartTime = 0;
+
+      if (
+        Math.abs(dx) <= 65 ||
+        Math.abs(dx) <= Math.abs(dy) * 1.25 ||
+        duration >= 900
+      ) {
+        return;
+      }
+
+      if (dx < -65) {
+        nextPartner();
+      } else if (dx > 65) {
+        $("stop").click();
+      }
+    }, { passive: true });
+
 
     // Wait for Firebase's initial auth state before redirecting; this avoids a premature login-page bounce.
     auth.onAuthStateChanged(async user=>{if(!user){authReady=false;window.location.replace("/login.html");return}try{const token=await user.getIdToken();socket.auth={token};authReady=true;if(!socket.connected)socket.connect();const cameraOk=await startCamera();if(cameraOk)status.textContent="Camera is ready, click Next to find someone !!"}catch(error){console.error("Authentication initialization error:",error);status.textContent="Login verification failed. Please log in again.";authReady=false}});

@@ -639,7 +639,23 @@
 const filterNames={normal:"Original",brightGlow:"Bright Glow",softFair:"Soft Fair Glow",funnyLens:"Funny Lens",beauty:"Beauty",glamLook:"Glam Look"};
     const filterCss={brightGlow:"brightness(1.13) saturate(1.12)",softFair:"brightness(1.12) saturate(.88) contrast(.94) sepia(.06)",funnyLens:"contrast(1.12) saturate(1.35) hue-rotate(-5deg)",beauty:"brightness(1.08) saturate(.96) contrast(.96)",glamLook:"contrast(1.08) saturate(1.2) sepia(.08)"};
    const canvasFilters={normal:"none",brightGlow:"brightness(1.13) saturate(1.12)",softFair:"brightness(1.12) saturate(.88) contrast(.94) sepia(.06)",funnyLens:"contrast(1.12) saturate(1.35) hue-rotate(-5deg)",beauty:"brightness(1.08) saturate(.96) contrast(.96)",glamLook:"contrast(1.08) saturate(1.2) sepia(.08)"};
-    const rtcConfig={iceServers:[{urls:"stun:stun.l.google.com:19302"}]};
+    const rtcConfig = {
+  iceServers: [
+    {
+      urls: "stun:stun.l.google.com:19302"
+    },
+    {
+      urls: "turn:free.expressturn.com:3478?transport=udp",
+      username: "000000002107607784",
+      credential: "zuflJvJdSXlPBtPqEhhXXgWcYPc="
+    },
+    {
+      urls: "turn:free.expressturn.com:3478?transport=tcp",
+      username: "000000002107607784",
+      credential: "zuflJvJdSXlPBtPqEhhXXgWcYPc="
+    }
+  ]
+};
 
     function playNotificationSound(){try{const AudioContextClass=window.AudioContext||window.webkitAudioContext;if(!AudioContextClass)return;const audioCtx=new AudioContextClass(),oscillator=audioCtx.createOscillator(),gainNode=audioCtx.createGain();oscillator.type="sine";oscillator.frequency.setValueAtTime(587.33,audioCtx.currentTime);gainNode.gain.setValueAtTime(.1,audioCtx.currentTime);gainNode.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.3);oscillator.connect(gainNode);gainNode.connect(audioCtx.destination);oscillator.start();oscillator.stop(audioCtx.currentTime+.3);oscillator.onended=()=>audioCtx.close().catch(()=>{});}catch(e){console.log("Audio play error:",e)}}
     function updateChatRegionIcon(){chatRegionIcon.innerHTML=regionSelect.value==="BD"?'<div class="bd-flag-icon"></div>':"🌐"}
@@ -797,7 +813,7 @@ function outgoingStream() {
     async function flushCandidates(){if(!peerConnection?.remoteDescription)return;for(const candidate of pendingCandidates.splice(0)){try{await peerConnection.addIceCandidate(candidate)}catch(error){console.error(error)}}}
    
 async function createPeer() {
-  if (!localStream) {
+console.log("createPeer() called");if (!localStream) {
     status.textContent = "Camera is not ready.";
     return;
   }
@@ -814,11 +830,7 @@ currentPeer.onicegatheringstatechange = () => {
   console.log("ICE Gathering:", currentPeer.iceGatheringState);
 };
 
-currentPeer.onicecandidate = (event) => {
-  if (event.candidate) {
-    console.log("ICE Candidate:", event.candidate.type);
-  }
-};
+
 
 currentPeer.onicecandidateerror = (event) => {
   console.log("ICE Candidate Error:", event.errorText);
@@ -871,14 +883,18 @@ currentPeer.onicecandidateerror = (event) => {
     }
   };
 
-  currentPeer.onicecandidate = event => {
-    if (event.candidate) {
-      sendSignal({
-        type: "candidate",
-        candidate: event.candidate
-      });
-    }
-  };
+ currentPeer.onicecandidate = event => {
+  if (event.candidate) {
+    console.log("ICE Candidate:", event.candidate.type);
+
+    sendSignal({
+      type: "candidate",
+      candidate: event.candidate
+    });
+  } else {
+    console.log("ICE Candidate gathering complete");
+  }
+};
 
   currentPeer.onconnectionstatechange = () => {
     if (peerConnection !== currentPeer) return;

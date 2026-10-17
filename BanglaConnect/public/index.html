@@ -805,6 +805,25 @@ async function createPeer() {
   peerConnection = new RTCPeerConnection(rtcConfig);
 
   const currentPeer = peerConnection;
+  
+currentPeer.oniceconnectionstatechange = () => {
+  console.log("ICE State:", currentPeer.iceConnectionState);
+};
+
+currentPeer.onicegatheringstatechange = () => {
+  console.log("ICE Gathering:", currentPeer.iceGatheringState);
+};
+
+currentPeer.onicecandidate = (event) => {
+  if (event.candidate) {
+    console.log("ICE Candidate:", event.candidate.type);
+  }
+};
+
+currentPeer.onicecandidateerror = (event) => {
+  console.log("ICE Candidate Error:", event.errorText);
+};
+
   const stream = outgoingStream();
 
   for (const track of stream.getTracks()) {

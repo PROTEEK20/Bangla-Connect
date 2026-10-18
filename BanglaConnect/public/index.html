@@ -677,16 +677,80 @@ const filterNames={normal:"Original",brightGlow:"Bright Glow",softFair:"Soft Fai
     genderSelect.addEventListener("change",()=>{if(peerId||status.textContent.includes("Looking For Someone")||status.textContent.includes("Waiting For A Partner")){closePeer();emitNextWithFilters()}});
     updateChatRegionIcon();
 
-    async function startCamera(){if(localStream)return true;if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){status.textContent="Camera needs HTTPS or localhost. Open the secure site.";return false}try{localStream = await navigator.mediaDevices.getUserMedia({
-  video: {
-    width: { ideal: 1280, max: 1280 },
-    height: { ideal: 960, max: 960 },
-    aspectRatio: { ideal: 4 / 3 },
-    frameRate: { ideal: 30, max: 60 },
-    facingMode: "user"
-  },
-  audio: true
-});localVideo.srcObject=localStream;await localVideo.play().catch(()=>{});setupProcessedVideo();return true}catch(error){console.error("Camera/microphone error:",error);status.textContent=error.name==="NotAllowedError"?"Allow Camera and Microphone permission in browser settings.":"Camera/Microphone unavailable. Check device permissions.";return false}}
+   
+async function startCamera() {
+  if (localStream && localStream.getVideoTracks().some(t => t.readyState === "live")) {
+    return true;
+  }
+
+  if (!navigator.mediaDevices?.getUserMedia) {
+    status.textContent = "Camera is not supported in this WebView.";
+    return false;
+  }
+
+  let videoStream = null;
+  let audioStream = null;
+
+  try {
+    // First, test the camera separately from the microphone.
+    videoStream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: "user",
+        width: { ideal: 640 },
+        height: { ideal: 480 }
+      },
+      audio: false
+    });
+
+    // If microphone initialization fails, keep the camera working.
+    try {
+      audioStream = await navigator.mediaDevices.getUserMedia({
+        video: false,
+        audio: true
+      });
+    } catch (audioError) {
+      console.error("Microphone-only error:", {
+        name: audioError.name,
+        message: audioError.message
+      });
+    }
+
+    localStream = new MediaStream([
+      ...videoStream.getVideoTracks(),
+      ...(audioStream ? audioStream.getAudioTracks() : [])
+    ]);
+
+    localVideo.srcObject = localStream;
+    await localVideo.play();
+
+    setupProcessedVideo();
+
+    status.textContent = audioStream
+      ? "Camera and microphone ready."
+      : "Camera ready; microphone unavailable.";
+
+    return true;
+
+  } catch (error) {
+    if (videoStream) {
+      videoStream.getTracks().forEach(track => track.stop());
+    }
+
+    if (audioStream) {
+      audioStream.getTracks().forEach(track => track.stop());
+    }
+
+    console.error("Camera-only error:", {
+      name: error.name,
+      message: error.message,
+      constraint: error.constraint
+    });
+
+    status.textContent = `${error.name}: ${error.message}`;
+    return false;
+  }
+}
+
    
 function setupProcessedVideo() {
   if (!localStream || processedCanvas) return;

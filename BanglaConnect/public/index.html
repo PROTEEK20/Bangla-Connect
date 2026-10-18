@@ -679,6 +679,7 @@ const filterNames={normal:"Original",brightGlow:"Bright Glow",softFair:"Soft Fai
 
    
 
+
 async function startCamera() {
   if (
     localStream &&
@@ -692,68 +693,81 @@ async function startCamera() {
     return false;
   }
 
-  let videoStream = null;
-  let audioStream = null;
+  let stream = null;
 
   try {
-    // Start the camera independently
-    videoStream = await navigator.mediaDevices.getUserMedia({
+    // First try camera and microphone together.
+    stream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: "user",
         width: { ideal: 640 },
         height: { ideal: 480 }
       },
-      audio: false
+      audio: true
     });
 
-    // Try to start the microphone independently
-    try {
-      audioStream = await navigator.mediaDevices.getUserMedia({
-        video: false,
-        audio: true
-      });
-    } catch (audioError) {
-      console.error(
-        `Microphone-only error: name=${audioError.name}, message=${audioError.message}, constraint=${audioError.constraint || "none"}`
-      );
-    }
-
-    // Combine video and audio tracks
-    localStream = new MediaStream([
-      ...videoStream.getVideoTracks(),
-      ...(audioStream ? audioStream.getAudioTracks() : [])
-    ]);
-
+    localStream = stream;
     localVideo.srcObject = localStream;
     await localVideo.play().catch(console.error);
 
     setupProcessedVideo();
 
-    status.textContent = audioStream
+    const hasAudio = localStream.getAudioTracks().some(
+      track => track.readyState === "live"
+    );
+
+    status.textContent = hasAudio
       ? "Camera and microphone ready."
       : "Camera ready; microphone unavailable.";
+
+    console.log("Media tracks:", localStream.getTracks().map(track => ({
+      kind: track.kind,
+      enabled: track.enabled,
+      readyState: track.readyState
+    })));
 
     return true;
 
   } catch (error) {
-    if (videoStream) {
-      videoStream.getTracks().forEach(track => track.stop());
-    }
-
-    if (audioStream) {
-      audioStream.getTracks().forEach(track => track.stop());
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
     }
 
     localStream = null;
 
     console.error(
-      `Camera error: name=${error.name}, message=${error.message}`
+      `Combined media error: name=${error.name}, message=${error.message}, constraint=${error.constraint || "none"}`
     );
 
-    status.textContent = `Camera error: ${error.name}`;
-    return false;
+    // Keep the camera working if combined capture fails.
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "user",
+          width: { ideal: 640 },
+          height: { ideal: 480 }
+        },
+        audio: false
+      });
+
+      localStream = stream;
+      localVideo.srcObject = localStream;
+      await localVideo.play().catch(console.error);
+
+      setupProcessedVideo();
+      status.textContent = "Camera ready; microphone unavailable.";
+
+      return true;
+
+    } catch (videoError) {
+      localStream = null;
+      console.error("Video fallback error:", videoError);
+      status.textContent = `Camera error: ${videoError.name}`;
+      return false;
+    }
   }
 }
+
 
 
    

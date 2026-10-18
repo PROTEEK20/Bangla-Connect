@@ -678,13 +678,17 @@ const filterNames={normal:"Original",brightGlow:"Bright Glow",softFair:"Soft Fai
     updateChatRegionIcon();
 
    
+
 async function startCamera() {
-  if (localStream && localStream.getVideoTracks().some(t => t.readyState === "live")) {
+  if (
+    localStream &&
+    localStream.getVideoTracks().some(t => t.readyState === "live")
+  ) {
     return true;
   }
 
   if (!navigator.mediaDevices?.getUserMedia) {
-    status.textContent = "Camera is not supported in this WebView.";
+    status.textContent = "Camera requires HTTPS or localhost.";
     return false;
   }
 
@@ -692,7 +696,7 @@ async function startCamera() {
   let audioStream = null;
 
   try {
-    // First, test the camera separately from the microphone.
+    // Start the camera independently
     videoStream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: "user",
@@ -702,26 +706,26 @@ async function startCamera() {
       audio: false
     });
 
-    // If microphone initialization fails, keep the camera working.
+    // Try to start the microphone independently
     try {
       audioStream = await navigator.mediaDevices.getUserMedia({
         video: false,
         audio: true
       });
     } catch (audioError) {
-      console.error("Microphone-only error:", {
-        name: audioError.name,
-        message: audioError.message
-      });
+      console.error(
+        `Microphone-only error: name=${audioError.name}, message=${audioError.message}, constraint=${audioError.constraint || "none"}`
+      );
     }
 
+    // Combine video and audio tracks
     localStream = new MediaStream([
       ...videoStream.getVideoTracks(),
       ...(audioStream ? audioStream.getAudioTracks() : [])
     ]);
 
     localVideo.srcObject = localStream;
-    await localVideo.play();
+    await localVideo.play().catch(console.error);
 
     setupProcessedVideo();
 
@@ -740,16 +744,17 @@ async function startCamera() {
       audioStream.getTracks().forEach(track => track.stop());
     }
 
-    console.error("Camera-only error:", {
-      name: error.name,
-      message: error.message,
-      constraint: error.constraint
-    });
+    localStream = null;
 
-    status.textContent = `${error.name}: ${error.message}`;
+    console.error(
+      `Camera error: name=${error.name}, message=${error.message}`
+    );
+
+    status.textContent = `Camera error: ${error.name}`;
     return false;
   }
 }
+
 
    
 function setupProcessedVideo() {

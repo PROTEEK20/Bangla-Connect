@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>BanglaConnect - Video Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@800;900&family=Russo+One&family=Teko:wght@700&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body,html{width:100%;height:100%;overflow:hidden;background:#000;font-family:Arial,Helvetica,sans-serif}
+    .app-container{position:relative;width:100vw;height:100vh;height:100dvh;display:flex;flex-direction:column;background:#000;overflow:hidden}
+    
+
+
+
+
+    #remoteVideo{transition:filter 1s ease}
+    .brand-overlay{position:absolute;top:16px;left:20px;z-index:10;display:none;align-items:center;gap:10px;font-family:'Orbitron','Russo One',sans-serif;font-weight:900;font-size:18px;font-style:italic;letter-spacing:1px;user-select:none;pointer-events:none}
+    .brand-overlay img{height:46px;width:auto;object-fit:contain;display:block}
+    #staticContainer{position:absolute;top:0;left:0;width:100%;height:100%;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#000;user-select:none;pointer-events:none}
+    #staticVideo{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1}
+    .static-brand-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+    .static-brand-content img{height:80px;width:auto;object-fit:contain;filter:drop-shadow(0 4px 15px rgba(0,0,0,.7))}
+    .static-brand-text{font-family:'Orbitron','Russo One',sans-serif;font-weight:900;font-size:24px;font-style:italic;letter-spacing:2px}
+
+/* BanglaConnect Logout Button */
+.logout-btn {
+  pointer-events: auto;
+  margin-top: 25px;
+  padding: 10px 24px;
+  border: 1px solid rgba(255, 120, 140, 0.65);
+  border-radius: 9px;
+  background: linear-gradient(135deg, #450a18, #881337);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(190, 18, 60, 0.3);
+  transition: transform .2s ease, filter .2s ease;
+}
+
+.logout-btn:hover {
+  filter: brightness(1.15);
+  transform: translateY(-2px);
+}
+
+.logout-btn:disabled {
+  opacity: .65;
+  cursor: wait;
+  transform: none;
+}
+
+@media (max-width: 640px) {
+  .logout-btn {
+    padding: 8px 20px;
+    font-size: 12px;
+  }
+}
+
+    .bangla-text{background:linear-gradient(135deg,#f0abfc,#d946ef);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 5px rgba(217,70,239,.4))}
+    .connect-text{background:linear-gradient(135deg,#a5b4fc,#6366f1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 5px rgba(99,102,241,.4))}
+    .chat-overlay{position:absolute;bottom:70px;left:20px;z-index:15;max-width:min(350px,80%);display:flex;flex-direction:column;gap:6px;pointer-events:none}
+    .chat-bubble{background:rgba(15,12,28,.85);border:1px solid #5a408c;color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;backdrop-filter:blur(4px);animation:fadeIn .3s ease;overflow-wrap:anywhere}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+    .bottom-bar{position:absolute;bottom:0;left:0;width:100%;z-index:20;background:rgba(10,8,20,.95);backdrop-filter:blur(10px);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid rgba(255,255,255,.1)}
+    .status-container{flex:.8;display:flex;align-items:center;min-width:0}
+    #status{width:100%;height:44px;background:#151122;border:1px solid #33274d;border-radius:8px;padding:0 12px;color:#bfa5ff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .online-badge{height:44px;padding:0 14px;background:#151122;border:1px solid #33274d;border-radius:8px;color:#00ff88;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;white-space:nowrap;flex-shrink:0}
+    .online-dot{width:8px;height:8px;background:#00ff88;border-radius:50%;box-shadow:0 0 8px #00ff88;animation:pulseDot 1.5s infinite}
+    @keyframes pulseDot{0%{opacity:1}50%{opacity:.4}100%{opacity:1}}
+    .controls-container{display:flex;gap:8px;align-items:center;justify-content:center;flex-shrink:0}
+    .region-select,.gender-select{height:44px;padding:0 12px;background:#1d182e;border:1px solid #5a408c;border-radius:8px;color:#00ff88;font-size:13px;font-weight:700;outline:none;cursor:pointer;transition:all .2s ease}
+    .region-select:hover,.gender-select:hover{border-color:#7c3aed}
+    .region-select option,.gender-select option{background:#0f0c1c;color:#fff}
+    .btn{height:44px;padding:0 16px;border:none;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;transition:all .2s ease;color:#fff;outline:none;display:flex;align-items:center;justify-content:center;white-space:nowrap}
+    .btn:hover{transform:translateY(-2px);filter:brightness(1.15)}.btn:active{transform:translateY(0)}
+    #next{background:linear-gradient(135deg,#7c3aed,#6d28d9);box-shadow:0 0 15px rgba(124,58,237,.4)}
+    #stop{background:#3b1724;border:1px solid #8c2d43;color:#ffcdd2}
+    .message-container{flex:1;display:flex;align-items:center;justify-content:center;min-width:0}
+    .chat-input-wrapper{width:100%;height:44px;background:#1d182e;border:1px solid #4c3773;border-radius:8px;display:flex;align-items:center;padding:0 8px 0 12px;gap:8px;transition:all .2s}
+    .chat-input-wrapper:focus-within{border-color:#8b5cf6;box-shadow:0 0 10px rgba(139,92,246,.3)}
+    .chat-region-icon{width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;line-height:1;user-select:none}
+    .bd-flag-icon{width:18px;height:18px;background:#006a4e;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center}
+    .bd-flag-icon:after{content:'';width:8px;height:8px;background:#f42a41;border-radius:50%}
+    #chatInput{flex:1;min-width:0;background:transparent;border:none;outline:none;color:#fff;font-size:13px;font-weight:500}
+    #chatInput::placeholder{color:#a5a5bd}
+    #sendBtn{background:linear-gradient(135deg,#8b5cf6,#6d28d9);border:none;color:#fff;height:32px;padding:0 12px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+    #sendBtn:hover{filter:brightness(1.2)}#sendBtn svg{width:16px;height:16px;fill:#fff}
+    /* Mobile-only elements; desktop layout stays as-is. */
+    .mobile-divider{display:none}
+    .report-btn{position:absolute;top:10px;right:10px;z-index:18;display:none;padding:3px;background:transparent;border:0;border-radius:0;color:#fff;font-size:25px;line-height:1;cursor:pointer;text-shadow:0 1px 5px #000}
+    .filter-toggle{display:block;position:absolute;right:10px;bottom:10px;z-index:20;border:1px solid #5a408c;background:rgba(15,12,28,.92);color:#f3e8ff;border-radius:9px;padding:8px 13px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 4px 12px #0007}
+
+
+/* Camera toggle: mobile only */
+.camera-toggle {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .camera-toggle {
+    display: flex;
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    z-index: 20;
+    width: 42px;
+    height: 36px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid #5a408c;
+    border-radius: 9px;
+    background: rgba(15, 12, 28, .92);
+    color: #f3e8ff;
+    cursor: pointer;
+    box-shadow: 0 4px 12px #0007;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .camera-toggle svg {
+    width: 21px;
+    height: 21px;
+  }
+
+  .camera-toggle:disabled {
+    opacity: .55;
+    cursor: wait;
+  }
+}
+
+
+    .filter-panel{position:absolute;right:10px;bottom:49px;z-index:19;display:none;flex-direction:column;align-items:stretch;gap:5px;width:max-content;max-width:calc(100% - 20px);padding:7px;background:rgba(15,12,28,.96);border:1px solid #5a408c;border-radius:11px;box-shadow:0 8px 24px #0009;backdrop-filter:blur(8px)}
+    .filter-panel.open{display:flex}
+    .filter-btn{border:1px solid #5a408c;background:rgba(28,22,45,.96);color:#ddd6fe;border-radius:7px;padding:8px 12px;font-size:11px;font-weight:800;cursor:pointer;text-align:left;white-space:nowrap}
+    .filter-btn.active{background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-color:#c4b5fd;color:#fff;box-shadow:0 0 10px #8b5cf655}
+    .filter-hint{color:#c4b5fd;font-size:9px;padding:3px 2px 1px;max-width:210px;line-height:1.3}
+    .typing-bubble{color:#00ff88!important;font-style:italic}
+    @keyframes mobileFlip{0%{transform:perspective(900px) rotateY(0deg);opacity:1}45%{transform:perspective(900px) rotateY(88deg);opacity:.35}55%{transform:perspective(900px) rotateY(-88deg);opacity:.35}100%{transform:perspective(900px) rotateY(0deg);opacity:1}}
+    
+    
+
+
+
+    @media(max-width:640px){
+      body,html{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
+      .app-container{height:100vh;height:100dvh;min-height:0;overflow:hidden;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+      .video-grid{flex:1;min-height:0;height:auto;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) 43px minmax(0,1fr);gap:0;perspective:1000px}
+      .video-box{width:100%;height:auto;min-height:0;min-width:0;position:relative;flex:none}
+      .video-box:nth-child(2){height:auto;border-top:0}
+      .video-box video{object-fit:contain}
+      .brand-overlay>span{display:none!important}
+      .brand-overlay img{height:28px}
+      .static-brand-content{gap:8px}.static-brand-content img{height:54px}.static-brand-text{font-size:17px;letter-spacing:1px}
+      .chat-overlay{bottom:12px;left:10px;max-width:78%;gap:4px}
+      .chat-bubble{font-size:11px;padding:6px 8px;border-radius:8px;max-width:100%}
+      #remoteChatOverlay{bottom:12px;left:10px;right:10px;max-width:none;align-items:flex-start}
+      #localChatOverlay{bottom:12px;left:10px;right:10px;max-width:none;align-items:flex-start}
+      .report-btn{display:block}
+      .mobile-divider{grid-row:2;display:grid;grid-template-columns:minmax(74px,.82fr) minmax(0,1.15fr) minmax(0,1fr);align-items:center;gap:6px;padding:4px 8px;background:#0a0814;border-top:1px solid #33274d;border-bottom:1px solid #33274d;min-width:0;z-index:12}
+      .mobile-online-badge{height:32px;min-width:0;width:100%;padding:0 6px;gap:5px;justify-content:center;font-size:10px;border-radius:7px}
+      .mobile-online-badge .online-dot{width:6px;height:6px;flex:none}
+      .mobile-region-select,.mobile-gender-select{width:100%;min-width:0;height:32px;padding:0 4px;font-size:10px;text-align:center;border-radius:7px;white-space:nowrap}
+      .bottom-bar{position:relative;left:auto;bottom:auto;flex:none;width:100%;padding:7px 9px calc(8px + env(safe-area-inset-bottom));background:rgba(10,8,20,.98);display:flex;align-items:center;gap:0;border-top:1px solid #33274d}
+      .status-container,.bottom-bar>.online-badge,.controls-container,.mobile-filter-label{display:none!important}
+      .message-container{width:100%;min-width:0;flex:1}
+      .chat-input-wrapper{height:42px;padding:0 7px 0 10px;gap:7px;border-radius:9px}
+      #chatInput{font-size:13px}
+      #sendBtn{height:31px;padding:0 11px}
+      .chat-region-icon{width:18px}
+      .filter-toggle{display:block}
+      .video-grid.flip-next #remoteBox{animation:mobileFlip .42s ease}
+    }
+    @media(max-width:380px){
+      .mobile-divider{grid-template-columns:minmax(68px,.8fr) minmax(0,1.1fr) minmax(0,1fr);gap:4px;padding-left:5px;padding-right:5px}
+      .mobile-online-badge{font-size:9px;padding:0 4px}
+      .mobile-region-select,.mobile-gender-select{font-size:9px}
+      .filter-toggle{padding:7px 10px}
+    }
+    @media(min-width:769px){
+  .report-btn,.mobile-divider{display:none!important}
+}
+ 
+ 
+/* ===== FINAL RESPONSIVE LAYOUT OVERRIDE ===== */
+
+/* DESKTOP */
+@media (min-width: 641px) {
+  .app-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .video-grid {
+    position: relative;
+    flex: 1 1 0;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+
+  .video-box {
+    position: relative;
+    flex: 0 1 calc((100% - 32px) / 2);
+    width: calc((100% - 32px) / 2);
+    height: auto;
+    aspect-ratio: 4 / 3;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  #remoteVideo,
+  #localVideo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .mobile-divider {
+    display: none !important;
+  }
+
+  .bottom-bar {
+    position: relative;
+    inset: auto;
+    flex: 0 0 auto;
+    width: 100%;
+    min-height: 68px;
+    padding: 8px 12px;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    z-index: 20;
+  }
+
+  .status-container {
+    display: flex !important;
+    flex: 1 1 130px;
+    min-width: 0;
+  }
+
+  #status {
+    min-width: 0;
+    font-size: 11px;
+    padding: 0 7px;
+  }
+
+  .bottom-bar > .online-badge {
+    display: flex !important;
+    flex: 0 0 auto;
+    padding: 0 9px;
+    font-size: 11px;
+  }
+
+  .controls-container {
+    display: flex !important;
+    flex: 0 1 auto;
+    min-width: 0;
+    gap: 6px;
+  }
+
+  .region-select,
+  .gender-select {
+    min-width: 0;
+    max-width: 125px;
+    padding: 0 6px;
+    font-size: 11px;
+  }
+
+  .btn {
+    flex: 0 0 auto;
+    padding: 0 10px;
+  }
+
+  .message-container {
+    display: flex !important;
+    flex: 1 1 170px;
+    min-width: 130px;
+  }
+
+  .filter-toggle,
+  .filter-panel {
+    display: none !important;
+  }
+
+  .report-btn {
+    display: none !important;
+  }
+}
+
+/* MOBILE */
+@media (max-width: 640px) {
+  .app-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    overflow: hidden;
+  }
+
+  .video-grid {
+    position: relative;
+    flex: 1 1 0;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) 43px minmax(0, 1fr);
+    gap: 0;
+    padding: 0;
+    perspective: 1000px;
+  }
+
+  .video-box {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    flex: none;
+    aspect-ratio: auto;
+    justify-self: stretch;
+    align-self: stretch;
+    overflow: hidden;
+  }
+
+  #remoteBox {
+    grid-row: 1;
+  }
+
+  #mobileDivider {
+    grid-row: 2;
+  }
+
+  #localBox {
+    grid-row: 3;
+  }
+
+  #remoteVideo,
+  #localVideo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .mobile-divider {
+    display: grid !important;
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: minmax(0, .82fr) minmax(0, 1.15fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    background: #0a0814;
+    border-top: 1px solid #33274d;
+    border-bottom: 1px solid #33274d;
+    z-index: 12;
+  }
+
+  .bottom-bar {
+    position: relative;
+    inset: auto;
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+    padding: 7px 9px calc(8px + env(safe-area-inset-bottom));
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: rgba(10, 8, 20, .98);
+    border-top: 1px solid #33274d;
+  }
+
+  .status-container,
+  .bottom-bar > .online-badge,
+  .controls-container,
+  .mobile-filter-label {
+    display: none !important;
+  }
+
+  .message-container {
+    display: flex !important;
+    flex: 1 1 0;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .chat-input-wrapper {
+    width: 100%;
+    height: 42px;
+    min-width: 0;
+    padding: 0 7px 0 10px;
+    gap: 7px;
+    border-radius: 9px;
+  }
+
+  #chatInput {
+    min-width: 0;
+    font-size: 13px;
+  }
+
+  #sendBtn {
+    height: 31px;
+    padding: 0 11px;
+  }
+
+  .chat-region-icon {
+    width: 18px;
+  }
+
+  .chat-overlay {
+    bottom: 12px;
+    left: 10px;
+    max-width: 78%;
+    gap: 4px;
+  }
+
+  #remoteChatOverlay,
+  #localChatOverlay {
+    bottom: 12px;
+    left: 10px;
+    right: 10px;
+    max-width: none;
+    align-items: flex-start;
+  }
+
+  
+/* MOBILE ONLY: Center my sent-message popup */
+@media (max-width: 640px) {
+  #localChatOverlay {
+    left: 58px;
+    right: 58px;
+    bottom: 55px;
+    max-width: none;
+    align-items: center;
+  }
+
+  #localChatOverlay .chat-bubble {
+    max-width: 100%;
+    text-align: center;
+  }
+}
+
+
+  .chat-bubble {
+    max-width: 100%;
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+
+  .brand-overlay > span {
+    display: none !important;
+  }
+
+  .brand-overlay img {
+    height: 28px;
+  }
+
+  .static-brand-content {
+    gap: 8px;
+  }
+
+  .static-brand-content img {
+    height: 54px;
+  }
+
+  .static-brand-text {
+    font-size: 17px;
+    letter-spacing: 1px;
+  }
+
+  .report-btn {
+    display: block !important;
+  }
+
+  .mobile-online-badge {
+    width: 100%;
+    height: 32px;
+    min-width: 0;
+    padding: 0 5px;
+    gap: 5px;
+    justify-content: center;
+    font-size: 10px;
+  }
+
+  .mobile-online-badge .online-dot {
+    width: 6px;
+    height: 6px;
+    flex: none;
+  }
+
+  .mobile-region-select,
+  .mobile-gender-select {
+    width: 100%;
+    height: 32px;
+    min-width: 0;
+    padding: 0 4px;
+    font-size: 10px;
+    text-align: center;
+  }
+
+  .filter-toggle {
+    display: block !important;
+    right: 10px;
+    bottom: 10px;
+  }
+
+  .filter-panel {
+    display: none;
+  }
+
+  .filter-panel.open {
+    display: flex;
+  }
+
+  .video-grid.flip-next #remoteBox {
+    animation: mobileFlip .42s ease;
+  }
+}
+
+@media (max-width: 380px) {
+  .mobile-divider {
+    grid-template-columns: minmax(0, .8fr) minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 4px;
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+
+  .mobile-online-badge,
+  .mobile-region-select,
+  .mobile-gender-select {
+    font-size: 9px;
+  }
+
+  .filter-toggle {
+    padding: 7px 10px;
+  }
+}
+
+ 
+/* ===== CAMERA ASPECT RATIO FIX ===== */
+
+/* Preserve the natural video ratio; fill the 4:3 box by cropping */
+#remoteVideo,
+#localVideo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+}
+
+/* Keep both video panels at 4:3 on desktop */
+@media (min-width: 641px) {
+  .video-box {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+  }
+}
+
+/* Mobile: equal video panels with no side bars */
+@media (max-width: 640px) {
+  #remoteBox,
+  #localBox {
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  #remoteVideo,
+  #localVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+}
+
+
+/* ===== DESKTOP FULL-BLEED VIDEO LAYOUT FIX ===== */
+@media (min-width: 641px) {
+
+  /* Remove the empty black space above, below and beside videos */
+  .app-container {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    padding: 0;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  .video-grid {
+    flex: 1 1 0;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    padding: 0;
+    margin: 0;
+    gap: 0;
+    align-items: stretch;
+    justify-content: stretch;
+    overflow: hidden;
+  }
+
+  /* Make both camera panels fill the available height */
+  #remoteBox,
+  #localBox {
+    flex: 1 1 50%;
+    width: 50%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    aspect-ratio: auto;
+    border: 0;
+    border-radius: 0;
+    overflow: hidden;
+  }
+
+  /* Fill each panel without stretching or distorting faces */
+  #remoteVideo,
+  #localVideo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+  }
+
+  /* Expand the bottom control bar's background upward in its area */
+  .bottom-bar {
+    position: relative;
+    flex: 0 0 auto;
+    width: 100%;
+    min-height: 78px;
+    margin: 0;
+    padding: 12px 16px;
+    gap: 8px;
+    border-radius: 0;
+    box-sizing: border-box;
+  }
+
+  .status-container,
+  .controls-container,
+  .message-container {
+    min-width: 0;
+  }
+}
+
+/* MOBILE ONLY: Fix local camera's horizontal mirroring */
+@media (max-width: 640px) {
+  #localVideo {
+    transform: scaleX(1);
+  }
+}
+
+ </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="video-grid" id="videoGrid">
+      <div class="video-box" id="remoteBox">
+        <div class="brand-overlay" id="brandOverlay"><img src="logo.png" alt="BanglaConnect Logo"><span><span class="bangla-text">Bangla</span> <span class="connect-text">Connect</span></span></div>
+        <div id="staticContainer"><video id="staticVideo" src="static.mp4" autoplay loop muted playsinline></video><div class="static-brand-content"><img src="logo.png" alt="BanglaConnect Logo"><div class="static-brand-text"><span class="bangla-text">Bangla</span> <span class="connect-text">Connect</span></div><button type="button" id="logoutBtn" class="logout-btn">Logout</button></div></div>
+        <div class="chat-overlay" id="remoteChatOverlay"></div>
+        <video id="remoteVideo" autoplay playsinline></video>
+        <button type="button" id="reportBtn" class="report-btn" aria-label="Report user" title="Report user">⚑</button>
+      </div>
+      <div class="mobile-divider" id="mobileDivider">
+        <div class="online-badge mobile-online-badge"><div class="online-dot"></div><span id="mobileOnlineCountText">Online: 1</span></div>
+        <select id="mobileRegionSelect" class="region-select mobile-region-select" title="Select Country" aria-label="Select Country"><option value="BD">🇧🇩 Bangladesh</option><option value="ALL">🌐 All Countries</option></select>
+        <select id="mobileGenderSelect" class="gender-select mobile-gender-select" title="Select Gender" aria-label="Select Gender"><option value="ANY">👤 Any Gender</option><option value="MALE">👨 Male</option><option value="FEMALE">👩 Female</option></select>
+      </div>
+      <div class="video-box" id="localBox">
+        <div class="chat-overlay" id="localChatOverlay"></div>
+        <video id="localVideo" autoplay muted playsinline></video>
+
+<button type="button" class="camera-toggle" id="cameraToggle"
+  aria-label="Switch camera" title="Switch camera">
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M20 7h-3l-2-3H9L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z"
+      fill="none" stroke="currentColor" stroke-width="1.8"
+      stroke-linejoin="round"/>
+    <circle cx="12" cy="13" r="3.5" fill="none"
+      stroke="currentColor" stroke-width="1.8"/>
+    <path d="M17 3l3 2-3 2" fill="none"
+      stroke="currentColor" stroke-width="1.6"
+      stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
+
+        <button type="button" class="filter-toggle" id="filterToggle" aria-expanded="false" aria-controls="filterPanel">Filter ▾</button>
+        <div class="filter-panel" id="filterPanel" aria-label="Video filters">
+
+          <button type="button" class="filter-btn active" data-filter="normal">Original</button>
+          <button type="button" class="filter-btn" data-filter="brightGlow">Bright Glow</button>
+          <button type="button" class="filter-btn" data-filter="softFair">Soft Skin</button>
+          <button type="button" class="filter-btn" data-filter="funnyLens">iPhone Vivid</button>
+          <button type="button" class="filter-btn" data-filter="beauty">Beauty Glow</button>
+          <div class="filter-hint">Tap once to preview · tap again to apply</div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-bar">
+      <div class="status-container"><div id="status">Camera is ready, click Next to find someone !!</div></div>
+      <div class="online-badge" id="onlineBadge"><div class="online-dot"></div><span id="onlineCountText">Online: 1</span></div>
+      <div class="mobile-filter-label mobile-only" id="filterLabel"><span></span><span id="activeFilterText"></span></div>
+      <div class="controls-container">
+        <select id="regionSelect" class="region-select" title="Select Region"><option value="BD">🌐 Bangladesh</option><option value="ALL">🌐 All Countries</option></select>
+        <select id="genderSelect" class="gender-select" title="Select Gender"><option value="ANY">👤 Any Gender</option><option value="MALE">👨 Male Only</option><option value="FEMALE">👩 Female Only</option></select>
+        <button id="next" class="btn" type="button">Next</button><button id="stop" class="btn" type="button">Stop</button>
+      </div>
+      <div class="message-container"><div class="chat-input-wrapper"><div id="chatRegionIcon" class="chat-region-icon"><div class="bd-flag-icon"></div></div><input type="text" id="chatInput" placeholder="Write a message..." autocomplete="off" maxlength="500"><button id="sendBtn" title="Send Message" type="button" aria-label="Send Message"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button></div></div>
+    </div>
+  </div>
+  <audio id="loginMusic" src="/login.mp3" preload="auto"></audio>
+  <audio id="connectedSound" src="/Connected.mp3" preload="auto"></audio>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    firebase.initializeApp({apiKey:"AIzaSyCp6tbuUZkoweVoDzmFgS-ZY4L-oV09fF8",authDomain:"bangla-connect-bb697.firebaseapp.com",projectId:"bangla-connect-bb697",storageBucket:"bangla-connect-bb697.firebasestorage.app",messagingSenderId:"388352957796",appId:"1:388352957796:web:dab71500b3a452c7c7ee71",measurementId:"G-2PKH6E4ZC4"});
+    const auth=firebase.auth();
+    const socket=io({autoConnect:false});
+    const $=id=>document.getElementById(id);
+$("logoutBtn").addEventListener("click", async () => {
+  const button = $("logoutBtn");
+
+  if (button.disabled) return;
+
+  button.disabled = true;
+  button.textContent = "Logging Out...";
+
+  try {
+    chatStopped = true;
+    stopFilterProcessing();
+
+    if (socket.connected) {
+      socket.emit("stop-chat");
+      socket.disconnect();
+    }
+
+    closePeer();
+
+    if (processedStream) {
+  processedStream.getTracks().forEach(track => track.stop());
+  processedStream = null;
+}
+
+if (localStream) {
+  localStream.getTracks().forEach(track => track.stop());
+  localStream = null;
+}
+
+    await auth.signOut();
+    window.location.replace("/");
+  } catch (error) {
+    console.error("Logout failed:", error);
+    button.disabled = false;
+    button.textContent = "Logout";
+    status.textContent = "Logout failed. Please try again.";
+  }
+});
+
+
+    const localVideo=$("localVideo"),remoteVideo=$("remoteVideo"),staticContainer=$("staticContainer"),staticVideo=$("staticVideo"),brandOverlay=$("brandOverlay"),status=$("status"),chatInput=$("chatInput"),sendBtn=$("sendBtn"),localChatOverlay=$("localChatOverlay"),remoteChatOverlay=$("remoteChatOverlay"),regionSelect=$("regionSelect"),genderSelect=$("genderSelect"),chatRegionIcon=$("chatRegionIcon"),onlineCountText=$("onlineCountText"),videoGrid=$("videoGrid");
+    let localStream=null,peerConnection=null,peerId=null,pendingCandidates=[],typingTimeout=null,authReady=false,chatStopped=false,pendingNextRequest=false;
+
+let currentCameraFacing = "user";
+let isSwitchingCamera = false;
+
+    let activeFilter="normal",previewFilter="",pendingFilterApply=null,filterTapTimer=null,processedCanvas=null,processedStream=null,processingVideo=null,processingContext=null,processingFrame=null;
+    let filterProcessingEnabled = false;
+const filterNames={normal:"Original",brightGlow:"Bright Glow",softFair:"Soft Fair Glow",funnyLens:"Funny Lens",beauty:"Beauty",glamLook:"Glam Look"};
+    const filterCss={brightGlow:"brightness(1.13) saturate(1.12)",softFair:"brightness(1.12) saturate(.88) contrast(.94) sepia(.06)",funnyLens:"contrast(1.12) saturate(1.35) hue-rotate(-5deg)",beauty:"brightness(1.08) saturate(.96) contrast(.96)",glamLook:"contrast(1.08) saturate(1.2) sepia(.08)"};
+   const canvasFilters={normal:"none",brightGlow:"brightness(1.13) saturate(1.12)",softFair:"brightness(1.12) saturate(.88) contrast(.94) sepia(.06)",funnyLens:"contrast(1.12) saturate(1.35) hue-rotate(-5deg)",beauty:"brightness(1.08) saturate(.96) contrast(.96)",glamLook:"contrast(1.08) saturate(1.2) sepia(.08)"};
+    const rtcConfig = {
+  iceServers: [
+    {
+      urls: "stun:stun.l.google.com:19302"
+    },
+    {
+      urls: "turn:free.expressturn.com:3478?transport=udp",
+      username: "000000002107607784",
+      credential: "zuflJvJdSXlPBtPqEhhXXgWcYPc="
+    },
+    {
+      urls: "turn:free.expressturn.com:3478?transport=tcp",
+      username: "000000002107607784",
+      credential: "zuflJvJdSXlPBtPqEhhXXgWcYPc="
+    }
+  ]
+};
+function playConnectedSound() {
+  const sound = document.getElementById("connectedSound");
+
+  if (!sound) {
+    console.error("Connected sound audio element not found.");
+    return;
+  }
+
+  sound.pause();
+  sound.currentTime = 0;
+  sound.volume = 0.5;
+
+  sound.play().catch(error => {
+    console.warn("Connected sound could not play:", error);
+  });
+}
+    function updateChatRegionIcon(){chatRegionIcon.innerHTML=regionSelect.value==="BD"?'<div class="bd-flag-icon"></div>':"🌐"}
+    const mobileRegionSelect=$("mobileRegionSelect"),mobileGenderSelect=$("mobileGenderSelect"),mobileOnlineCountText=$("mobileOnlineCountText"),filterToggle=$("filterToggle"),filterPanel=$("filterPanel");
+    function syncMobileFilters(){if(mobileRegionSelect)mobileRegionSelect.value=regionSelect.value;if(mobileGenderSelect)mobileGenderSelect.value=genderSelect.value}
+    mobileRegionSelect.addEventListener("change",()=>{regionSelect.value=mobileRegionSelect.value;regionSelect.dispatchEvent(new Event("change"))});
+    mobileGenderSelect.addEventListener("change",()=>{genderSelect.value=mobileGenderSelect.value;genderSelect.dispatchEvent(new Event("change"))});
+    regionSelect.addEventListener("change",syncMobileFilters);genderSelect.addEventListener("change",syncMobileFilters);syncMobileFilters();
+    filterToggle.addEventListener("click",()=>{const open=filterPanel.classList.toggle("open");filterToggle.setAttribute("aria-expanded",String(open));filterToggle.textContent=open?"Filter ▴":"Filter ▾"});
+    document.addEventListener("click",event=>{if(filterPanel.classList.contains("open")&&!filterPanel.contains(event.target)&&event.target!==filterToggle){filterPanel.classList.remove("open");filterToggle.setAttribute("aria-expanded","false");filterToggle.textContent="Filter ▾"}});
+    function emitNextWithFilters(){if(!authReady||!socket.connected)return;const region=regionSelect.value,gender=genderSelect.value;status.textContent=`Looking For Someone (${gender}) in ${region==="BD"?"Bangladesh":"All Countries"}...`;socket.emit("next",{region,gender})}
+    regionSelect.addEventListener("change",()=>{updateChatRegionIcon();if(peerId||status.textContent.includes("Looking For Someone")||status.textContent.includes("Waiting For A Partner")){closePeer();emitNextWithFilters()}});
+    genderSelect.addEventListener("change",()=>{if(peerId||status.textContent.includes("Looking For Someone")||status.textContent.includes("Waiting For A Partner")){closePeer();emitNextWithFilters()}});
+    updateChatRegionIcon();
+
+    async function startCamera(){if(localStream)return true;if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){status.textContent="Camera needs HTTPS or localhost. Open the secure site.";return false}try{localStream = await navigator.mediaDevices.getUserMedia({
+  video: {
+    width: { ideal: 640, max: 640 },
+    height: { ideal: 480, max: 480 },
+    aspectRatio: { ideal: 4 / 3 },
+    frameRate: { ideal: 30, max: 30 },
+    facingMode: "user"
+  },
+  audio: true
+});localVideo.srcObject=localStream;localVideo.style.transform = "scaleX(-1)";await localVideo.play().catch(()=>{});setupProcessedVideo();return true}catch(error){console.error("Camera/microphone error:",error);status.textContent=error.name==="NotAllowedError"?"Allow Camera and Microphone permission in browser settings.":"Camera/Microphone unavailable. Check device permissions.";return false}}
+   
+function setupProcessedVideo() {
+  if (!localStream || processedCanvas) return;
+
+  processedCanvas = document.createElement("canvas");
+  processedCanvas.width = 640;
+  processedCanvas.height = 480;
+
+  processingContext = processedCanvas.getContext("2d", {
+    alpha: false
+  });
+
+  processingVideo = document.createElement("video");
+  processingVideo.muted = true;
+  processingVideo.playsInline = true;
+  processingVideo.srcObject = new MediaStream(
+    localStream.getVideoTracks()
+  );
+
+  processingVideo.play().catch(() => {});
+
+  function draw() {
+    if (!filterProcessingEnabled) {
+      processingFrame = null;
+      return;
+    }
+
+    if (
+      !processedCanvas ||
+      !processingContext ||
+      !processingVideo
+    ) {
+      processingFrame = null;
+      return;
+    }
+
+    if (processingVideo.readyState >= 2) {
+      processingContext.save();
+      processingContext.filter =
+        canvasFilters[activeFilter] || "none";
+
+      processingContext.drawImage(
+        processingVideo,
+        0,
+        0,
+        processedCanvas.width,
+        processedCanvas.height
+      );
+
+      processingContext.restore();
+    }
+
+    processingFrame = requestAnimationFrame(draw);
+  }
+
+  try {
+    const videoStream = processedCanvas.captureStream(24);
+
+    processedStream = new MediaStream([
+      ...videoStream.getVideoTracks(),
+      ...localStream.getAudioTracks()
+    ]);
+  } catch (error) {
+    console.warn("Canvas filter unavailable:", error);
+    processedStream = localStream;
+  }
+
+  processingVideo.dataset.startProcessing = "ready";
+}
+
+
+function startFilterProcessing() {
+  if (
+    filterProcessingEnabled ||
+    !processingVideo ||
+    !processingContext
+  ) return;
+
+  filterProcessingEnabled = true;
+
+  function draw() {
+    if (!filterProcessingEnabled) {
+      processingFrame = null;
+      return;
+    }
+
+    if (processingVideo.readyState >= 2) {
+      processingContext.save();
+      processingContext.filter =
+        canvasFilters[activeFilter] || "none";
+
+      processingContext.drawImage(
+        processingVideo,
+        0,
+        0,
+        processedCanvas.width,
+        processedCanvas.height
+      );
+
+      processingContext.restore();
+    }
+
+    processingFrame = requestAnimationFrame(draw);
+  }
+
+  draw();
+}
+
+function stopFilterProcessing() {
+  filterProcessingEnabled = false;
+
+  if (processingFrame !== null) {
+    cancelAnimationFrame(processingFrame);
+    processingFrame = null;
+  }
+}
+
+function outgoingStream() {
+  return localStream;
+}
+
+async function switchCamera() {
+  if (isSwitchingCamera) return;
+
+  const cameraButton = $("cameraToggle");
+
+  if (!localStream || !localStream.getVideoTracks().length) {
+    status.textContent = "Camera is not ready.";
+    return;
+  }
+
+  if (!navigator.mediaDevices?.getUserMedia) {
+    status.textContent = "Camera switching requires HTTPS.";
+    return;
+  }
+
+  isSwitchingCamera = true;
+  cameraButton.disabled = true;
+
+  const oldStream = localStream;
+  const oldVideoTrack = oldStream.getVideoTracks()[0];
+  const oldFacing = currentCameraFacing;
+  const nextFacing = oldFacing === "user" ? "environment" : "user";
+
+  let newVideoTrack = null;
+  let newCameraStream = null;
+  let sender = null;
+  let senderChanged = false;
+
+  try {
+    // Find the existing WebRTC video sender, if connected.
+    if (peerConnection) {
+      sender = peerConnection.getSenders().find(
+        item => item.track?.kind === "video"
+      );
+    }
+
+    // Android phones may not allow both cameras to run simultaneously.
+    // Stop only the old video track; keep the microphone running.
+    oldVideoTrack.stop();
+
+    // First try the requested camera using its facing mode.
+    try {
+      newCameraStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { exact: nextFacing },
+          width: { ideal: 640 },
+          height: { ideal: 480 }
+        },
+        audio: false
+      });
+    } catch (firstError) {
+      console.warn("Exact camera request failed; trying fallback:", firstError);
+
+      // Fallback for phones that do not accept the exact facing-mode request.
+      newCameraStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: nextFacing },
+          width: { ideal: 640 },
+          height: { ideal: 480 }
+        },
+        audio: false
+      });
+    }
+
+    newVideoTrack = newCameraStream.getVideoTracks()[0];
+
+    if (!newVideoTrack) {
+      throw new Error("No camera video track was found.");
+    }
+
+    // Replace the camera in the existing call without reconnecting.
+    if (sender) {
+      await sender.replaceTrack(newVideoTrack);
+      senderChanged = true;
+    }
+
+    // Keep the existing microphone and install the new camera track.
+    const audioTracks = oldStream.getAudioTracks();
+
+    localStream = new MediaStream([
+      ...audioTracks,
+      newVideoTrack
+    ]);
+
+    localVideo.srcObject = localStream;
+    await localVideo.play();
+
+    // Update the local filter preview source too.
+    if (processingVideo) {
+      processingVideo.srcObject = new MediaStream([newVideoTrack]);
+      await processingVideo.play().catch(() => {});
+    }
+
+    currentCameraFacing = nextFacing;localVideo.style.transform =
+  nextFacing === "user" ? "scaleX(-1)" : "scaleX(1)";
+
+    status.textContent = nextFacing === "environment"
+      ? "Rear camera enabled."
+      : "Front camera enabled.";
+
+  } catch (error) {
+    console.error("Camera switch failed:", error);
+
+    // Stop a partially acquired camera before trying to restore the old one.
+    if (newCameraStream) {
+      newCameraStream.getTracks().forEach(track => track.stop());
+    }
+
+    try {
+      // The previous video track was stopped, so reacquire its camera.
+      const restoredStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: oldFacing },
+          width: { ideal: 1280 },
+          height: { ideal: 960 }
+        },
+        audio: false
+      });
+
+      const restoredTrack = restoredStream.getVideoTracks()[0];
+
+      if (!restoredTrack) {
+        throw new Error("Could not restore the previous camera.");
+      }
+
+     if (sender) {
+  await sender.replaceTrack(restoredTrack);
+}
+
+      localStream = new MediaStream([
+        ...oldStream.getAudioTracks(),
+        restoredTrack
+      ]);
+
+      localVideo.srcObject = localStream;
+      await localVideo.play().catch(() => {});
+
+      if (processingVideo) {
+        processingVideo.srcObject = new MediaStream([restoredTrack]);
+        await processingVideo.play().catch(() => {});
+      }
+
+      currentCameraFacing = oldFacing;
+
+    } catch (restoreError) {
+      console.error("Could not restore camera:", restoreError);
+      status.textContent =
+        "Camera unavailable. Please allow camera permission and try again.";
+    }
+
+    console.error("Camera switch details:", error.name, error.message);
+
+  } finally {
+    isSwitchingCamera = false;
+    cameraButton.disabled = false;
+  }
+}
+
+
+const cameraToggle = $("cameraToggle");
+
+cameraToggle.addEventListener("click", () => {
+  switchCamera();
+});
+
+
+
+    function applyPreviewFilter(name){previewFilter=name;localVideo.style.filter=filterCss[name]||"none";document.querySelectorAll(".filter-btn").forEach(button=>button.classList.toggle("active",button.dataset.filter===name));$("activeFilterText").textContent=filterNames[name]||"Normal"}
+    document.querySelectorAll(".filter-btn").forEach(button=>button.addEventListener("click",()=>{const name=button.dataset.filter;if(pendingFilterApply!==name){pendingFilterApply=name;applyPreviewFilter(name);status.textContent=`Previewing ${filterNames[name]} — tap again to apply`;clearTimeout(filterTapTimer);filterTapTimer=setTimeout(()=>{pendingFilterApply=null;applyPreviewFilter(activeFilter)},5000);return}activeFilter=name;pendingFilterApply=null;applyPreviewFilter(activeFilter);status.textContent=`${filterNames[name]} filter applied`;clearTimeout(filterTapTimer);filterPanel.classList.remove("open");filterToggle.setAttribute("aria-expanded","false");filterToggle.textContent="Filter ▾"}));
+
+    function closePeer(){if(peerConnection){peerConnection.ontrack=null;peerConnection.onicecandidate=null;peerConnection.onconnectionstatechange=null;peerConnection.close();peerConnection=null}peerId=null;pendingCandidates=[];if(remoteVideo.srcObject){remoteVideo.pause();remoteVideo.srcObject=null;remoteVideo.removeAttribute("src");remoteVideo.load()}remoteVideo.style.filter="blur(0px)";staticContainer.style.display="flex";staticVideo.play().catch(()=>{});brandOverlay.style.display="none";localChatOverlay.innerHTML="";remoteChatOverlay.innerHTML=""}
+    function sendSignal(data){if(peerId&&socket.connected)socket.emit("signal",{target:peerId,data})}
+    function sendMessage(){const text=chatInput.value.trim();if(!text)return;if(!peerId){status.textContent="Find a partner first to send messages.";return}sendSignal({type:"chat",message:text});displayLocalMessage("You: "+text);chatInput.value="";socket.emit("typing",false)}
+    function displayLocalMessage(msg){const bubble=document.createElement("div");bubble.className="chat-bubble";bubble.textContent=msg;localChatOverlay.appendChild(bubble);setTimeout(()=>bubble.remove(),10000)}
+    function displayRemoteMessage(msg){const typingEl=$("typingIndicator");if(typingEl)typingEl.remove();const bubble=document.createElement("div");bubble.className="chat-bubble";bubble.textContent=msg;remoteChatOverlay.appendChild(bubble);playNotificationSound();setTimeout(()=>bubble.remove(),10000)}
+    chatInput.addEventListener("input",()=>{if(!peerId)return;socket.emit("typing",true);clearTimeout(typingTimeout);typingTimeout=setTimeout(()=>socket.emit("typing",false),1200)});sendBtn.addEventListener("click",sendMessage);chatInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();sendMessage()}});
+    async function flushCandidates(){if(!peerConnection?.remoteDescription)return;for(const candidate of pendingCandidates.splice(0)){try{await peerConnection.addIceCandidate(candidate)}catch(error){console.error(error)}}}
+   
+async function createPeer() {
+console.log("createPeer() called");if (!localStream) {
+    status.textContent = "Camera is not ready.";
+    return;
+  }
+
+  peerConnection = new RTCPeerConnection(rtcConfig);
+
+  const currentPeer = peerConnection;
+  
+currentPeer.oniceconnectionstatechange = () => {
+  console.log("ICE State:", currentPeer.iceConnectionState);
+};
+
+currentPeer.onicegatheringstatechange = () => {
+  console.log("ICE Gathering:", currentPeer.iceGatheringState);
+};
+
+
+
+currentPeer.onicecandidateerror = (event) => {
+  console.log("ICE Candidate Error:", event.errorText);
+};
+
+  const stream = outgoingStream();
+
+  for (const track of stream.getTracks()) {
+    const sender = currentPeer.addTrack(track, stream);
+
+    if (track.kind === "video") {
+      try {
+        const params = sender.getParameters();
+
+        if (params.encodings && params.encodings.length > 0) {
+          params.encodings[0].maxBitrate = 800000;
+          params.encodings[0].maxFramerate = 30;
+        } else {
+          params.encodings = [{
+            maxBitrate: 800000,
+            maxFramerate: 30
+          }];
+        }
+
+        await sender.setParameters(params);
+      } catch (error) {
+        console.warn("Video quality settings could not be applied:", error);
+      }
+    }
+  }
+
+  currentPeer.ontrack = event => {
+    if (event.streams[0]) {
+      remoteVideo.style.transition = "none";
+      remoteVideo.style.filter = "blur(20px)";
+      remoteVideo.srcObject = event.streams[0];
+
+      remoteVideo.play().catch(error => console.log(error));
+
+      staticContainer.style.display = "none";
+      staticVideo.pause();
+      brandOverlay.style.display = "flex";
+
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          remoteVideo.style.transition = "filter 1s ease";
+          remoteVideo.style.filter = "blur(0px)";
+        }, 40);
+      });
+    }
+  };
+
+ currentPeer.onicecandidate = event => {
+  if (event.candidate) {
+    console.log("ICE Candidate:", event.candidate.type);
+
+    sendSignal({
+      type: "candidate",
+      candidate: event.candidate
+    });
+  } else {
+    console.log("ICE Candidate gathering complete");
+  }
+};
+
+
+currentPeer.onconnectionstatechange = () => {
+  if (peerConnection !== currentPeer) return;
+
+  if (currentPeer.connectionState === "connected") {
+    status.textContent = "Connected To Another User !!";
+    playConnectedSound();
+  } else if (currentPeer.connectionState === "failed") {
+    status.textContent = "Connection Failed, Try Again !!";
+  }
+};
+}
+
+    async function handleSignal(data){if(data.type==="chat"){if(typeof data.message==="string")displayRemoteMessage("Stranger: "+data.message.slice(0,500));return}if(!peerConnection)return;try{if(data.type==="offer"){await peerConnection.setRemoteDescription(data.offer);await flushCandidates();const answer=await peerConnection.createAnswer();await peerConnection.setLocalDescription(answer);sendSignal({type:"answer",answer:peerConnection.localDescription})}else if(data.type==="answer"){await peerConnection.setRemoteDescription(data.answer);await flushCandidates()}else if(data.type==="candidate"){if(peerConnection.remoteDescription)await peerConnection.addIceCandidate(data.candidate);else pendingCandidates.push(data.candidate)}}catch(error){console.error(error);status.textContent="There Was A Problem Establishing The Connection !!"}}
+    async function nextPartner(){if(!authReady){status.textContent="Checking login, please wait...";return}const ok=await startCamera();if(!ok)return;if(!socket.connected){status.textContent="Connecting to server...";pendingNextRequest=true;socket.connect();return}videoGrid.classList.remove("flip-next");void videoGrid.offsetWidth;videoGrid.classList.add("flip-next");setTimeout(()=>videoGrid.classList.remove("flip-next"),450);closePeer();chatStopped=false;emitNextWithFilters()}
+    $("next").addEventListener("click",nextPartner);
+    $("stop").addEventListener("click",()=>{chatStopped=true;stopFilterProcessing();if(socket.connected)socket.emit("stop-chat");closePeer();status.textContent="Chat Stopped. Click Next to find someone !!"});
+    socket.on("connect",()=>{if(pendingNextRequest){pendingNextRequest=false;emitNextWithFilters()}});socket.on("report-result",result=>{status.textContent=result?.message||(result?.ok?"Report submitted. Thank you.":"Could not submit report.")});socket.on("online-count",count=>{onlineCountText.textContent=`Online: ${count}`;mobileOnlineCountText.textContent=`Online: ${count}`});socket.on("waiting",()=>{status.textContent="Waiting For A Partner To Connect..."});
+    socket.on("partner-typing",isTyping=>{let typingEl=$("typingIndicator");if(isTyping){if(!typingEl){typingEl=document.createElement("div");typingEl.id="typingIndicator";typingEl.className="chat-bubble typing-bubble";typingEl.textContent="Stranger is typing...";remoteChatOverlay.appendChild(typingEl)}}else if(typingEl)typingEl.remove()});
+    
+socket.on("matched", async match => {
+  if (!match || !match.peerId) return;
+
+  closePeer();
+  peerId = match.peerId;
+
+  try {
+    await createPeer();
+
+    if (!peerConnection || !peerId) return;
+
+    status.textContent = "Partner Found, Connecting...";
+
+    if (match.initiator) {
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+
+      sendSignal({
+        type: "offer",
+        offer: peerConnection.localDescription
+      });
+    }
+  } catch (error) {
+    console.error("WebRTC connection error:", error);
+    status.textContent = "The Call Could Not Be Started !!";
+  }
+});
+
+    socket.on("signal",async message=>{if(message&&message.from===peerId)await handleSignal(message.data)});socket.on("partner-left",()=>{closePeer();if(!chatStopped)status.textContent="Partner Left, Click Next To Find Someone Else !!"});socket.on("connect_error",error=>{console.error("Socket connection error:",error);status.textContent="Cannot Connect To Server. Check login/session and server."});
+
+    $("reportBtn").addEventListener("click",()=>{if(!peerId){status.textContent="Connect to a partner before reporting.";return}const reason=window.prompt("Why are you reporting this user?\n1. Nudity / sexual content\n2. Harassment / abuse\n3. Spam / other\nType a short reason:");if(reason===null)return;const cleanReason=reason.trim().slice(0,250);if(!cleanReason){status.textContent="Please enter a report reason.";return}socket.emit("report",{reason:cleanReason});status.textContent="Submitting report..."});
+
+    
+    
+    // Mobile-only swipe controls on the stranger's video
+    // Right-to-left = Next partner
+    // Left-to-right = Stop chat
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartTime = 0;
+    const remoteBox = $("remoteBox");
+
+    remoteBox.addEventListener("touchstart", event => {
+      if (!window.matchMedia("(max-width: 640px)").matches) return;
+      if (event.touches.length !== 1) return;
+
+      touchStartX = event.touches[0].clientX;
+      touchStartY = event.touches[0].clientY;
+      touchStartTime = Date.now();
+    }, { passive: true });
+
+    remoteBox.addEventListener("touchend", event => {
+      if (!window.matchMedia("(max-width: 640px)").matches) return;
+      if (!touchStartTime || !event.changedTouches.length) return;
+
+      const dx = event.changedTouches[0].clientX - touchStartX;
+      const dy = event.changedTouches[0].clientY - touchStartY;
+      const duration = Date.now() - touchStartTime;
+
+      touchStartTime = 0;
+
+      if (
+        Math.abs(dx) <= 65 ||
+        Math.abs(dx) <= Math.abs(dy) * 1.25 ||
+        duration >= 900
+      ) {
+        return;
+      }
+
+      if (dx < -65) {
+        nextPartner();
+      } else if (dx > 65) {
+        $("stop").click();
+      }
+    }, { passive: true });
+
+
+    // Wait for Firebase's initial auth state before redirecting; this avoids a premature login-page bounce.
+   auth.onAuthStateChanged(async user => {
+  if (!user) {
+    authReady = false;
+    window.location.replace("/login.html");
+    return;
+  }
+
+  // Play login music at 80% volume
+  const loginMusic = document.getElementById("loginMusic");
+  if (loginMusic) {
+    loginMusic.volume = 0.8;
+    loginMusic.play().catch(() => {
+      // Browser blocks autoplay: continue without music.
+    });
+  }
+
+  try {
+    const token = await user.getIdToken();
+    socket.auth = { token };
+    authReady = true;
+
+    if (!socket.connected) socket.connect();
+
+    const cameraOk = await startCamera();
+
+    if (cameraOk) {
+      status.textContent =
+        "Camera is ready, click Next to find someone !!";
+    }
+  } catch (error) {
+    console.error("Authentication initialization error:", error);
+    status.textContent =
+      "Login verification failed. Please log in again.";
+    authReady = false;
+  }
+});
+
+
+window.addEventListener("pagehide", () => {
+  stopFilterProcessing();
+});
+
+</script>
+</body>
+</html>

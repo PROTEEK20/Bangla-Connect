@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f0c1c">
+<title>BanglaConnect - Welcome</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Russo+One&family=Teko:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#0f0c1c;--panel:#171226;--line:#33274d;--purple:#8b5cf6;--text:#f7f4ff;--muted:#bcb3d2}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Arial,sans-serif;background:radial-gradient(ellipse at 50% 10%,#2a1b47 0%,#151024 42%,#0b0913 100%);color:var(--text)}
+body{min-height:100vh;display:grid;place-items:center;padding:24px}
+.welcome{width:min(100%,560px);text-align:center;padding:clamp(28px,7vw,58px) clamp(22px,6vw,48px);border:1px solid rgba(164,128,255,.28);border-radius:28px;background:linear-gradient(145deg,rgba(30,23,48,.96),rgba(15,12,28,.96));box-shadow:0 24px 80px #0008,0 0 50px #8b5cf61a}
+.logo-mark{width:76px;height:76px;margin:0 auto 22px;border-radius:22px;display:grid;place-items:center;background:linear-gradient(135deg,#a78bfa,#6d28d9);box-shadow:0 12px 30px #7c3aed55;font-size:36px}
+h1{font:800 clamp(30px,8vw,48px)/1.1 Orbitron,Arial,sans-serif;margin:0;letter-spacing:.02em;overflow-wrap:anywhere}
+h1 span{color:#b99aff}
+.slogan{font:600 clamp(17px,4vw,22px)/1.25 Teko,Arial,sans-serif;color:#ded3ff;margin:18px 0 8px}
+.sub{font-size:14px;line-height:1.6;color:var(--muted);margin:0 auto 32px;max-width:390px}
+.login{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:58px;border:0;border-radius:15px;background:linear-gradient(135deg,#9b6bff,#6d35d6);color:#fff;text-decoration:none;font:700 17px Orbitron,Arial,sans-serif;letter-spacing:.08em;box-shadow:0 12px 26px #7c3aed40;transition:transform .18s,filter .18s}
+.login:hover{filter:brightness(1.12);transform:translateY(-2px)}.login:focus-visible{outline:3px solid #d8c4ff;outline-offset:4px}
+.flag{margin-top:28px;color:#a9a0bf;font-size:12px;letter-spacing:.08em}
+@media(max-width:380px){body{padding:14px}.welcome{border-radius:22px;padding:30px 20px}.logo-mark{width:64px;height:64px}}
+
+.info-buttons{display:grid;grid-template-columns:1fr;gap:9px;margin-top:12px}
+.info-btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;padding:10px 14px;border:1px solid #403158;border-radius:12px;background:#1b152b;color:#eee7ff;font-size:14px;font-weight:700;text-decoration:none;cursor:pointer;transition:background .15s,border-color .15s}
+.info-btn:hover{background:#2b2042;border-color:#7555a8}
+.info-btn.developer-btn {
+    background: linear-gradient(135deg, #9b6bff, #6d35d6);
+    border-color: transparent;
+    color: #fff;
+    min-height: 58px;
+    font: 700 17px Orbitron, Arial, sans-serif;
+    box-shadow: 0 12px 26px #7c3aed40;
+}
+.modal{display:none;position:fixed;inset:0;z-index:10;padding:18px;background:#05030bd9;align-items:center;justify-content:center}
+.modal.open{display:flex}
+.modal-content{width:min(100%,620px);max-height:85vh;overflow:auto;position:relative;padding:25px 22px;border:1px solid #59447b;border-radius:18px;background:#171226;box-shadow:0 20px 70px #000a;text-align:left}
+.modal-content h2{font:700 22px Orbitron,Arial,sans-serif;margin:0 42px 18px 0;color:#d7c5ff}
+.modal-content h3{font-size:16px;color:#cbb8ff;margin:18px 0 6px}
+.modal-content p,.modal-content li{font-size:14px;line-height:1.7;color:#e4dff0}
+.modal-content a{color:#c5a9ff;overflow-wrap:anywhere}
+.close-modal{position:absolute;top:12px;right:12px;width:36px;height:36px;border:1px solid #49365f;border-radius:10px;background:#251b39;color:white;font-size:22px;cursor:pointer}
+@media(max-width:380px){.modal-content{padding:22px 17px}}
+
+</style>
+</head>
+<body>
+<main class="welcome">
+  <div class="logo-mark" aria-hidden="true">🇧🇩</div>
+  <h1>Bangla <span>Connect</span></h1>
+  <p class="slogan">Bangladesh's First Random Video Chat Site</p>
+  <p class="sub"></p>
+  <a class="login" href="/login.html"><span>LOGIN</span><span aria-hidden="true">→</span></a>
+  <div class="info-buttons" aria-label="Website information">
+    <button class="info-btn" type="button" onclick="openModal('privacyModal')">Privacy Policy</button>
+    <button class="info-btn" type="button" onclick="openModal('termsModal')">Terms of Service</button>
+    <button class="info-btn developer-btn" type="button" onclick="openModal('devModal')">Developer Information</button>
+  </div>
+  <div class="flag">BANGLADESH MADE IT FOR THE WORLD</div>
+</main>
+<div class="modal" id="privacyModal" role="dialog" aria-modal="true" aria-labelledby="privacyTitle" onclick="backdropClose(event,'privacyModal')">
+ <div class="modal-content"><button class="close-modal" onclick="closeModal('privacyModal')" aria-label="Close">×</button>
+  <h2 id="privacyTitle">Privacy Policy</h2>
+  <h3>English</h3>
+  <p>BanglaConnect is designed to help people connect through random video chat. We use information needed to provide and protect the service, including account information and technical data required for authentication, safety, and operation.</p>
+  <p>Do not share passwords, financial information, home addresses, or other sensitive personal information with strangers. We do not promise that conversations with other users are private or that another user cannot capture content using an external device.</p>
+  <p>If you have questions about privacy, contact the developer using the information in Developer Information.</p>
+  <h3>বাংলা</h3>
+  <p>BanglaConnect একটি র‍্যান্ডম ভিডিও চ্যাট সাইট। সেবাটি চালানো, অ্যাকাউন্ট যাচাই এবং নিরাপত্তা বজায় রাখার জন্য প্রয়োজনীয় তথ্য ব্যবহার করা হতে পারে।</p>
+  <p>অপরিচিত কারও সঙ্গে পাসওয়ার্ড, ব্যাংক/আর্থিক তথ্য, বাসার ঠিকানা বা সংবেদনশীল ব্যক্তিগত তথ্য শেয়ার করবেন না। অন্য কেউ বাইরের ডিভাইস দিয়ে কথোপকথন রেকর্ড বা ধারণ করবে না—এমন নিশ্চয়তা দেওয়া যায় না।</p>
+ </div>
+</div>
+<div class="modal" id="termsModal" role="dialog" aria-modal="true" aria-labelledby="termsTitle" onclick="backdropClose(event,'termsModal')">
+ <div class="modal-content"><button class="close-modal" onclick="closeModal('termsModal')" aria-label="Close">×</button>
+  <h2 id="termsTitle">Terms of Service</h2>
+  <h3>English</h3>
+  <p>By using BanglaConnect, you agree to use the service lawfully and respectfully. You must be at least 18 years old to use this service.</p>
+  <ul><li>No nudity, sexual exploitation, threats, harassment, hate, or illegal activity.</li><li>Do not share another person's private information.</li><li>Do not record, screenshot, or redistribute another person's conversation or image without their consent.</li><li>Do not attempt to disrupt, abuse, or bypass the service's security.</li></ul>
+  <p>Access may be restricted for misuse. The service is provided as available and may change or be temporarily unavailable.</p>
+  <h3>বাংলা</h3>
+  <p>BanglaConnect ব্যবহার করার মাধ্যমে আপনি আইন মেনে এবং অন্যদের সম্মান করে সাইটটি ব্যবহারে সম্মত হচ্ছেন। এই সেবা ব্যবহারের জন্য আপনার বয়স কমপক্ষে ১৮ বছর হতে হবে।</p>
+  <ul><li>নগ্নতা, যৌন হয়রানি, হুমকি, ঘৃণামূলক আচরণ বা বেআইনি কাজ করা যাবে না।</li><li>অন্যের ব্যক্তিগত তথ্য প্রকাশ করা যাবে না।</li><li>অনুমতি ছাড়া অন্যের কথোপকথন বা ছবি রেকর্ড, স্ক্রিনশট বা ছড়িয়ে দেওয়া যাবে না।</li><li>সাইটের নিরাপত্তা নষ্ট করার চেষ্টা করা যাবে না।</li></ul>
+ </div>
+</div>
+<div class="modal" id="devModal" role="dialog" aria-modal="true" aria-labelledby="devTitle" onclick="backdropClose(event,'devModal')">
+ <div class="modal-content"><button class="close-modal" onclick="closeModal('devModal')" aria-label="Close">×</button>
+  <h2 id="devTitle">Developer Information</h2>
+  <p><strong>Developer:</strong> Proteek Afnan</p>
+  <p><strong>Email:</strong> <a href="mailto:proteekafnan20@gmail.com">proteekafnan20@gmail.com</a></p>
+  <p><strong>YouTube:</strong> <a href="https://youtube.com/@proteekafnan19?si=DQlz-IxY3sAU2S2g" target="_blank" rel="noopener noreferrer">@proteekafnan19</a></p>
+  <p><strong>TikTok:</strong> <a href="https://www.tiktok.com/@proteekafnan18" target="_blank" rel="noopener noreferrer">@proteekafnan18</a></p>
+  <p><strong>Instagram:</strong> <a href="https://www.instagram.com/proteekafnan18/?hl=en" target="_blank" rel="noopener noreferrer">@proteekafnan18</a></p>
+ </div>
+</div>
+
+
+<script>
+function openModal(id){const modal=document.getElementById(id);if(modal){modal.classList.add('open');document.body.style.overflow='hidden';const close=modal.querySelector('.close-modal');if(close)close.focus()}}
+function closeModal(id){const modal=document.getElementById(id);if(modal){modal.classList.remove('open');document.body.style.overflow=''}}
+function backdropClose(event,id){if(event.target===event.currentTarget)closeModal(id)}
+document.addEventListener('keydown',event=>{if(event.key==='Escape')document.querySelectorAll('.modal.open').forEach(modal=>closeModal(modal.id))});
+
+</script>
+
+<audio id="welcomeMusic" src="/welcome.mp3" preload="auto"></audio>
+
+<script>
+  const welcomeMusic = document.getElementById("welcomeMusic");
+  welcomeMusic.volume = 0.8;
+
+  welcomeMusic.play().catch(() => {
+    // Browser autoplay block করলে মিউজিক বাজবে না।
+  });
+</script>
+
+</body>
+</html>

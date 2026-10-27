@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f0c1c">
+<title>Login - Bangla Connect</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Russo+One&family=Teko:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#0f0c1c;--card:#171226;--line:#33274d;--purple:#8b5cf6;--text:#f7f4ff;--muted:#bcb3d2}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;padding:22px 14px;display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;background:radial-gradient(ellipse at 50% 0%,#2a1b47 0%,#151024 42%,#0b0913 100%);color:var(--text)}
+.login-card{width:100%;max-width:440px;padding:clamp(22px,5vw,34px);border:1px solid rgba(164,128,255,.25);border-radius:24px;background:linear-gradient(145deg,#1c1630f5,#120e20f7);box-shadow:0 22px 70px #0008}
+.brand{text-align:center;margin-bottom:25px}.brand-mark{font-size:30px;margin-bottom:8px}.brand h1{font:800 clamp(24px,7vw,31px) Orbitron,Arial,sans-serif;margin:0;overflow-wrap:anywhere}.brand h1 span{color:#b99aff}.brand p{font:600 14px Teko,Arial,sans-serif;color:#d8c8ff;margin:8px 0 0}
+.field-label{display:block;font-size:13px;color:#d8d0e9;margin:15px 0 7px}.field{width:100%;height:48px;padding:0 14px;border:1px solid #40345a;border-radius:11px;background:#0e0b18;color:#fff;font-size:15px;outline:none}.field:focus{border-color:#a78bfa;box-shadow:0 0 0 3px #8b5cf626}
+.btn{width:100%;min-height:47px;border:1px solid transparent;border-radius:11px;padding:12px 14px;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:700;font-size:14px;cursor:pointer;text-decoration:none;transition:filter .15s,transform .15s}.btn:hover{filter:brightness(1.12)}.btn:active{transform:scale(.99)}.btn-primary{background:linear-gradient(135deg,#9b6bff,#6d35d6);color:white;margin-top:22px}.btn-secondary{background:#211a34;color:#eee7ff;border-color:#44345f;margin-top:10px}.btn-link{background:#120e20;color:#cbb8ff;border-color:#3b2b57;margin-top:10px}.btn-info{background:#1b152b;color:#eee7ff;border-color:#403158;margin-top:9px;min-height:43px}.btn-info:hover{background:#2b2042}.message{min-height:20px;margin:12px 0 0;font-size:13px;line-height:1.5;color:#ff9fbd;text-align:center}.note{text-align:center;font-size:12px;line-height:1.6;color:#a9a0bf;margin:22px 0 12px}.copyright{text-align:center;color:#7f7696;font-size:11px;margin-top:16px}
+.modal{display:none;position:fixed;inset:0;z-index:10;padding:18px;background:#05030bd9;align-items:center;justify-content:center}.modal.open{display:flex}.modal-content{width:min(100%,620px);max-height:85vh;overflow:auto;position:relative;padding:25px 22px;border:1px solid #59447b;border-radius:18px;background:#171226;box-shadow:0 20px 70px #000a}.modal-content h2{font:700 22px Orbitron,Arial,sans-serif;margin:0 42px 18px 0;color:#d7c5ff}.modal-content h3{font-size:16px;color:#cbb8ff;margin:18px 0 6px}.modal-content p,.modal-content li{font-size:14px;line-height:1.7;color:#e4dff0}.modal-content a{color:#c5a9ff;overflow-wrap:anywhere}.close-modal{position:absolute;top:12px;right:12px;width:36px;height:36px;border:1px solid #49365f;border-radius:10px;background:#251b39;color:white;font-size:22px;cursor:pointer}
+@media(max-width:380px){body{padding:12px}.login-card{padding:22px 18px;border-radius:20px}.modal-content{padding:22px 17px}}
+</style>
+</head>
+<body>
+<main class="login-card">
+  <header class="brand">
+    <div class="brand-mark" aria-hidden="true"></div>
+    <h1>Bangla <span>Connect</span></h1>
+    <p id="formTitle">Meet New People = Make New Connections</p>
+  </header>
+  <form id="authForm">
+    <label class="field-label" for="email">Email Address</label>
+    <input class="field" type="email" id="email" name="email" autocomplete="email" placeholder="Enter your email" required>
+    <label class="field-label" for="password">Password</label>
+    <input class="field" type="password" id="password" name="password" autocomplete="current-password" placeholder="Enter your password" minlength="6" required>
+    <button class="btn btn-primary" type="submit" id="submitBtn">LOGIN</button>
+  </form>
+  <button class="btn btn-secondary" type="button" id="toggleBtn">Create New Account</button>
+  <button class="btn btn-link" type="button" id="forgotBtn">Forgot Password?</button>
+  <p class="message" id="message" role="status" aria-live="polite"></p>
+
+  <div class="note">Please Respect Others And Protect Your Personal Information !!</div>
+ 
+  <div class="copyright">© 2026 Bangla Connect</div>
+</main>
+
+<div class="modal" id="privacyModal" role="dialog" aria-modal="true" aria-labelledby="privacyTitle" onclick="backdropClose(event,'privacyModal')">
+ <div class="modal-content"><button class="close-modal" onclick="closeModal('privacyModal')" aria-label="Close">×</button>
+  <h2 id="privacyTitle">Privacy Policy</h2>
+  <h3>English</h3>
+  <p>BanglaConnect is designed to help people connect through random video chat. We use information needed to provide and protect the service, including account information and technical data required for authentication, safety, and operation.</p>
+  <p>Do not share passwords, financial information, home addresses, or other sensitive personal information with strangers. We do not promise that conversations with other users are private or that another user cannot capture content using an external device.</p>
+  <p>If you have questions about privacy, contact the developer using the information in Developer Information.</p>
+  <h3>বাংলা</h3>
+  <p>BanglaConnect একটি র‍্যান্ডম ভিডিও চ্যাট সাইট। সেবাটি চালানো, অ্যাকাউন্ট যাচাই এবং নিরাপত্তা বজায় রাখার জন্য প্রয়োজনীয় তথ্য ব্যবহার করা হতে পারে।</p>
+  <p>অপরিচিত কারও সঙ্গে পাসওয়ার্ড, ব্যাংক/আর্থিক তথ্য, বাসার ঠিকানা বা সংবেদনশীল ব্যক্তিগত তথ্য শেয়ার করবেন না। অন্য কেউ বাইরের ডিভাইস দিয়ে কথোপকথন রেকর্ড বা ধারণ করবে না—এমন নিশ্চয়তা দেওয়া যায় না।</p>
+ </div>
+</div>
+<div class="modal" id="termsModal" role="dialog" aria-modal="true" aria-labelledby="termsTitle" onclick="backdropClose(event,'termsModal')">
+ <div class="modal-content"><button class="close-modal" onclick="closeModal('termsModal')" aria-label="Close">×</button>
+  <h2 id="termsTitle">Terms of Service</h2>
+  <h3>English</h3>
+  <p>By using BanglaConnect, you agree to use the service lawfully and respectfully. You must be at least 18 years old to use this service.</p>
+  <ul><li>No nudity, sexual exploitation, threats, harassment, hate, or illegal activity.</li><li>Do not share another person's private information.</li><li>Do not record, screenshot, or redistribute another person's conversation or image without their consent.</li><li>Do not attempt to disrupt, abuse, or bypass the service's security.</li></ul>
+  <p>Access may be restricted for misuse. The service is provided as available and may change or be temporarily unavailable.</p>
+  <h3>বাংলা</h3>
+  <p>BanglaConnect ব্যবহার করার মাধ্যমে আপনি আইন মেনে এবং অন্যদের সম্মান করে সাইটটি ব্যবহারে সম্মত হচ্ছেন। এই সেবা ব্যবহারের জন্য আপনার বয়স কমপক্ষে ১৮ বছর হতে হবে।</p>
+  <ul><li>নগ্নতা, যৌন হয়রানি, হুমকি, ঘৃণামূলক আচরণ বা বেআইনি কাজ করা যাবে না।</li><li>অন্যের ব্যক্তিগত তথ্য প্রকাশ করা যাবে না।</li><li>অনুমতি ছাড়া অন্যের কথোপকথন বা ছবি রেকর্ড, স্ক্রিনশট বা ছড়িয়ে দেওয়া যাবে না।</li><li>সাইটের নিরাপত্তা নষ্ট করার চেষ্টা করা যাবে না।</li></ul>
+ </div>
+</div>
+<div class="modal" id="devModal" role="dialog" aria-modal="true" aria-labelledby="devTitle" onclick="backdropClose(event,'devModal')">
+ <div class="modal-content"><button class="close-modal" onclick="closeModal('devModal')" aria-label="Close">×</button>
+  <h2 id="devTitle">Developer Information</h2>
+  <p><strong>Developer:</strong> Proteek Afnan</p>
+  <p><strong>Email:</strong> <a href="mailto:proteekafnan20@gmail.com">proteekafnan20@gmail.com</a></p>
+  <p><strong>YouTube:</strong> <a href="https://youtube.com/@proteekafnan19?si=DQlz-IxY3sAU2S2g" target="_blank" rel="noopener noreferrer">@proteekafnan19</a></p>
+  <p><strong>TikTok:</strong> <a href="https://www.tiktok.com/@proteekafnan18" target="_blank" rel="noopener noreferrer">@proteekafnan18</a></p>
+  <p><strong>Instagram:</strong> <a href="https://www.instagram.com/proteekafnan18/?hl=en" target="_blank" rel="noopener noreferrer">@proteekafnan18</a></p>
+ </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCp6tbuUZkoweVoDzmFgS-ZY4L-oV09fF8",
+  authDomain: "bangla-connect-bb697.firebaseapp.com",
+  projectId: "bangla-connect-bb697",
+  storageBucket: "bangla-connect-bb697.firebasestorage.app",
+  messagingSenderId: "388352957796",
+  appId: "1:388352957796:web:dab71500b3a452c7c7ee71",
+  measurementId: "G-2PKH6E4ZC4"
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const authForm = document.getElementById('authForm');
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+const submitBtn = document.getElementById('submitBtn');
+const toggleBtn = document.getElementById('toggleBtn');
+const forgotBtn = document.getElementById('forgotBtn');
+const formTitle = document.getElementById('formTitle');
+const message = document.getElementById('message');
+let isSignup = false;
+function showMessage(text, success=false){message.textContent=text;message.style.color=success?'#8df5b2':'#ff9fbd'}
+toggleBtn.addEventListener('click',()=>{
+  isSignup=!isSignup;
+  formTitle.textContent=isSignup?'Create Your Account':'Welcome Back';
+  submitBtn.textContent=isSignup?'CREATE ACCOUNT':'LOGIN';
+  toggleBtn.textContent=isSignup?'Already Have An Account? Login':'Create New Account';
+  passwordInput.autocomplete=isSignup?'new-password':'current-password';
+  showMessage('');
+});
+authForm.addEventListener('submit',async(event)=>{
+  event.preventDefault();
+  const email=emailInput.value.trim();
+  const password=passwordInput.value;
+  submitBtn.disabled=true;
+  submitBtn.style.opacity='.65';
+  showMessage(isSignup?'Creating your account...':'Logging in...');
+  try{
+    if(isSignup) await auth.createUserWithEmailAndPassword(email,password);
+    else await auth.signInWithEmailAndPassword(email,password);
+    window.location.replace('/chat.html');
+  }catch(error){
+    const messages={
+      'auth/invalid-email':'Please enter a valid email address.',
+      'auth/user-not-found':'No account found with this email. Create an account first.',
+      'auth/wrong-password':'Incorrect email or password.',
+      'auth/invalid-credential':'Incorrect email or password.',
+      'auth/email-already-in-use':'An account already exists with this email.',
+      'auth/weak-password':'Password should be at least 6 characters.',
+      'auth/too-many-requests':'Too many attempts. Please try again later.',
+      'auth/network-request-failed':'Network error. Check your internet connection.'
+    };
+    showMessage(messages[error.code]||error.message||'Something went wrong. Please try again.');
+  }finally{
+    submitBtn.disabled=false;
+    submitBtn.style.opacity='1';
+  }
+});
+forgotBtn.addEventListener('click',async()=>{
+  const email=emailInput.value.trim();
+  if(!email){showMessage('Enter your email address first, then tap Forgot Password.');emailInput.focus();return}
+  try{await auth.sendPasswordResetEmail(email);showMessage('Password reset email sent. Check your inbox.',true)}
+  catch(error){showMessage(error.code==='auth/user-not-found'?'No account found with this email.':error.message)}
+});
+auth.onAuthStateChanged(user=>{
+  if(user) window.location.replace('/chat.html');
+});
+function openModal(id){const modal=document.getElementById(id);if(modal){modal.classList.add('open');document.body.style.overflow='hidden';const close=modal.querySelector('.close-modal');if(close)close.focus()}}
+function closeModal(id){const modal=document.getElementById(id);if(modal){modal.classList.remove('open');document.body.style.overflow=''}}
+function backdropClose(event,id){if(event.target===event.currentTarget)closeModal(id)}
+document.addEventListener('keydown',event=>{if(event.key==='Escape')document.querySelectorAll('.modal.open').forEach(modal=>closeModal(modal.id))});
+</script>
+</body>
+</html>
